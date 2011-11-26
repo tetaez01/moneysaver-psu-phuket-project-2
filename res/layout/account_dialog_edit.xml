@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/relativeLayout1"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<ImageView android:layout_height="60dip"
+		android:id="@+id/account_dialog_edit_bankimg" android:layout_width="60dip"
+		android:layout_alignParentLeft="true" android:src="@drawable/cash"></ImageView>
+	<TextView android:id="@+id/account_dialog_edit_bankname"
+		android:layout_width="wrap_content" android:layout_toRightOf="@+id/account_dialog_edit_bankimg"
+		android:text="Cash" android:gravity="center_vertical"
+		android:textSize="20dip" android:layout_height="60dip"/>
+	<TextView android:id="@+id/account_dialog_edit_limittext"
+		android:layout_width="wrap_content"
+		android:layout_below="@+id/account_dialog_edit_bankimg"
+		android:layout_height="40dip" android:text="วงเงิน :"
+		android:textSize="20dip" android:gravity="center_vertical"/>
+	<EditText android:id="@+id/account_dialog_edit_limit" android:layout_width="fill_parent"
+		android:layout_height="40dip"
+		android:layout_toRightOf="@+id/account_dialog_edit_limittext"
+		android:layout_below="@+id/account_dialog_edit_bankimg" />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@+id/accountDialog_LinearLayout3" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:layout_below="@+id/account_dialog_edit_limit"
+		android:layout_centerHorizontal="true">
+		<Button android:id="@+id/account_dialog_edit_ButtonSubmit"
+			android:layout_height="wrap_content" android:text="ตกลง"
+			android:layout_width="wrap_content" />
+		<Button android:id="@+id/account_dialog_edit_ButtonCancel"
+			android:layout_gravity="center_horizontal" android:layout_height="wrap_content"
+			android:text="ยกเลิก" android:layout_width="wrap_content" />
+	</LinearLayout>	
+
+</RelativeLayout>
+

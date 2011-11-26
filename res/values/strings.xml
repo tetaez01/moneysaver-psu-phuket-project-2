@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, MoneySaverMain!</string>
+    <string name="app_name">MoneySaver</string>
+    <string name="category">ประเภทบัญชี</string>
+    <string name="bankname">บัญชีธนาคาร</string>
+    <string name="paytype">ประเภทการใช้จ่าย</string>
+    <string name="payway">ช่องทางการใช้จ่าย</string>
+</resources>

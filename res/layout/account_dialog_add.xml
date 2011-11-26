@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content" android:layout_height="wrap_content">
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent" android:orientation="vertical"
+		android:layout_height="wrap_content">
+		<TextView android:id="@+id/accountDialog_TextViewBankName"
+			android:text="ธนาคาร  : " android:layout_height="wrap_content"
+			android:layout_width="wrap_content" />
+		<Spinner android:id="@+id/accountDialog_SpinnerBankName" android:prompt="@string/bankname"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+		<TextView android:id="@+id/accountDialog_TextViewAccountName"
+			android:text="ชื่อบัญชี  : " android:layout_height="wrap_content"
+			android:layout_width="wrap_content" />
+		<EditText android:id="@+id/accountDialog_EditTextAccountName"
+			android:text="" android:layout_height="wrap_content"
+			android:layout_width="fill_parent" />
+		<TextView android:id="@+id/accountDialog_TextViewCategory"
+			android:text="ประเภทบัญชี" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+		<Spinner android:id="@+id/accountDialog_SpinnerCategory" android:prompt="@string/category"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+		<TextView android:id="@+id/accountDialog_TextViewAmount"
+			android:text="ยอดเงินปัจจุบัน : " android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+		<EditText android:id="@+id/accountDialog_EditTextAmount"
+			android:text="" android:layout_height="wrap_content"
+			android:layout_width="fill_parent" />
+
+		<TextView android:id="@+id/accountDialog_TextViewLimited"
+			android:text="จำกัดวงเงินที่ใช้ :" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" />
+		<EditText android:id="@+id/accountDialog_EditTextLimited"
+			android:text="" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			android:gravity="center">
+			<Button android:id="@+id/accountDialog_ButtonSubmit"
+				android:layout_height="wrap_content" android:text="ตกลง"
+				android:layout_width="wrap_content"/>
+			<Button android:id="@+id/accountDialog_ButtonCancel"
+				android:layout_height="wrap_content" android:text="ยกเลิก"
+				android:layout_width="wrap_content" />
+		</LinearLayout>
+
+	</LinearLayout>
+</RelativeLayout>
