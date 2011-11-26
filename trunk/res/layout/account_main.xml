@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent" android:layout_height="match_parent">
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="30dip" android:orientation="horizontal"
+		android:background="#716D69">
+
+		<TextView android:id="@+id/accountMain_top" android:layout_weight="0.8"
+			android:layout_width="0dip" android:layout_height="wrap_content"
+			android:typeface="serif" android:textSize="15dip" android:text="สมุดบัญชี"
+			android:layout_centerHorizontal="true" android:gravity="center_horizontal"
+			android:background="#716D69" />
+		<Button android:layout_width="wrap_content" android:layout_height="35dip"
+			android:text="+" android:textColor="#000000" android:textSize="15sp"
+			android:id="@+id/accountMain_add" android:textStyle="bold"></Button>
+	</LinearLayout>
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="280dip" android:orientation="vertical">
+
+		<ListView android:id="@+id/accountMain_accountlist"
+			android:layout_width="fill_parent" android:layout_height="270dip" />
+
+
+	</LinearLayout>
+
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="20dip" android:orientation="horizontal"
+		android:background="#716D69">
+		<TextView android:layout_weight="0.33"
+			android:layout_width="0dip" android:layout_height="wrap_content"
+			android:typeface="serif" android:text="Income:" android:textSize="15dip"
+			android:gravity="center" />
+		<TextView android:layout_weight="0.33"
+			android:typeface="serif" android:layout_width="0dip"
+			android:layout_height="wrap_content" android:text="Expense:"
+			android:textSize="15dip" android:gravity="center" />
+		<TextView android:layout_weight="0.33"
+			android:typeface="serif" android:layout_width="0dip"
+			android:layout_height="wrap_content" android:text="Amount:"
+			android:textSize="15dip" android:gravity="center" />
+	</LinearLayout>
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:orientation="horizontal"
+		android:background="#716D69">
+		<TextView android:id="@+id/accountMain_totalIncome" android:layout_weight="0.33"
+			android:layout_width="0dip" android:layout_height="wrap_content"
+			android:typeface="serif"  android:textSize="15dip"
+			android:gravity="center" android:textColor="#52B804"
+			android:textStyle="bold"/>
+		<TextView android:id="@+id/accountMain_totalExpense" android:layout_weight="0.33"
+			android:typeface="serif" android:layout_width="0dip"
+			android:layout_height="wrap_content" android:textSize="15dip" 
+			android:gravity="center" android:textColor="#E05818"
+			android:textStyle="bold"/>
+		<TextView android:id="@+id/accountMain_totalRemain" android:layout_weight="0.33"
+			android:typeface="serif" android:layout_width="0dip"
+			android:layout_height="wrap_content" android:textSize="15dip" 
+			android:gravity="center" android:textStyle="bold"/>
+	</LinearLayout>
+</LinearLayout>
