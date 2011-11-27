@@ -8,7 +8,7 @@
 
 		<TextView android:id="@+id/accountMain_top" android:layout_weight="0.8"
 			android:layout_width="0dip" android:layout_height="wrap_content"
-			android:typeface="serif" android:textSize="15dip" android:text="สมุดบัญชี"
+			android:typeface="serif" android:textSize="15dip" android:text="หน้าหลัก"
 			android:layout_centerHorizontal="true" android:gravity="center_horizontal"
 			android:background="#716D69" />
 		<Button android:layout_width="wrap_content" android:layout_height="35dip"
