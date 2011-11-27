@@ -44,19 +44,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String colbankName = "bank_name";
 	public static final String colbankAcronym = "bank_acronym";
 	
-	public static final String accountTypeTable = "account_type";
-	public static final String colAccountTypeId = "account_type_id";
-	public static final String colAccountType = "account_type";
+	public static final String accountTypeTable = "fix_account_type";
+	public static final String colAccountTypeId = "fix_account_type_id";
+	public static final String colAccountType = "fix_account_type";
+	
+	public static final String accountTypeUsingTable = "fix_account_type_using";
+	public static final String colAccountTypeUsingId = "fix_account_type_using_id";
+	public static final String colAccountTypeUsing = "fix_account_type_using_description";
 	
 	public static final String accountTable = "account";
 	public static final String colAccountId = "account_id";
-	public static final String colAccountName = "account_name";
+	public static final String colAccountNumber = "account_number";
+	public static final String colAccountName = "account_name";	
 	public static final String colAccountCurrentBalance = "account_current_balance";
 	public static final String colAccountLimitUsage = "account_limit_usage";
 	
 	public static final String activityTable = "activity";
 	public static final String colActivityId = "activity_id";
-	public static final String colActivityTypeUsing = "type_using";
+	//public static final String colAccountTypeUsingId = "fix_account_type_using_id";
 	public static final String colActivityDescription = "description";
 	//public static final String colActivityPathUsing = "path_using";
 	public static final String colActivityDate = "date";
@@ -85,10 +90,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 					+ colAccountTypeId + " INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ colAccountType + " TEX NOT NULL)");
 			
+			db.execSQL("CREATE TABLE " + accountTypeUsingTable + " (" 
+					+ colAccountTypeUsingId + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+					+ colAccountTypeUsing + " TEX NOT NULL)");
+			
 			db.execSQL("CREATE TABLE " + accountTable + " (" 
 					+ colAccountId + " INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ colbankId + " INTEGER,"
 					+ colAccountTypeId + " INTEGER,"
+					+ colAccountNumber + " TEX NOT NULL,"
 					+ colAccountName + " TEX NOT NULL,"					
 					+ colAccountLimitUsage + " NUMBER,"
 					+ colAccountCurrentBalance + " NUMBER)");
@@ -96,7 +106,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			db.execSQL("CREATE TABLE " + activityTable + " (" 
 					+ colActivityId + " INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ colAccountId + " INTEGER , " 
-					+ colActivityTypeUsing + " TEXT NOT NULL,"
+					+ colAccountTypeUsingId + " TEXT NOT NULL,"
 					+ colActivityDescription + " TEXT NOT NULL," 
 					+ colActivityDate + " TEXT NOT NULL," 
 					+ colActivityTime + " TEXT NOT NULL," 
@@ -139,13 +149,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(17,'ธนาคารอิสลามแห่งประเทศไทย','ibank')");
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(18,'ธนาคารไอซีบีซี','icbc')");
 		//ข้อมูลชนิดบัญชี
-		db.execSQL("insert into account_type(account_type_id,account_type) values(0,'เงินสด')");
-		db.execSQL("insert into account_type(account_type_id,account_type) values(1,'บัญชีกระแสรายวัน')");
-		db.execSQL("insert into account_type(account_type_id,account_type) values(2,'บัญชีออมทรัพย์')");
-		db.execSQL("insert into account_type(account_type_id,account_type) values(3,'บัญชีเงินฝากประจำ')");
+		db.execSQL("insert into fix_account_type(fix_account_type_id,fix_account_type) values(0,'เงินสด')");
+		db.execSQL("insert into fix_account_type(fix_account_type_id,fix_account_type) values(1,'บัญชีกระแสรายวัน')");
+		db.execSQL("insert into fix_account_type(fix_account_type_id,fix_account_type) values(2,'บัญชีออมทรัพย์')");
+		db.execSQL("insert into fix_account_type(fix_account_type_id,fix_account_type) values(3,'บัญชีเงินฝากประจำ')");
+		//ข้อมูลประเภทการใช้จ่าย
+		db.execSQL("insert into fix_account_type_using(fix_account_type_using_id,fix_account_type_using_description) values(0,'รายรับ')");
+		db.execSQL("insert into fix_account_type_using(fix_account_type_using_id,fix_account_type_using_description) values(1,'รายจ่าย')");
+		db.execSQL("insert into fix_account_type_using(fix_account_type_using_id,fix_account_type_using_description) values(2,'ถอนเงิน')");
+		db.execSQL("insert into fix_account_type_using(fix_account_type_using_id,fix_account_type_using_description) values(3,'โอนเงิน')");
+		
 		
 		//ข้อมูลบัญชี สถานะ เงินสด
-		db.execSQL("insert into account(account_id,bank_id,account_name,account_type_id,account_limit_usage,account_current_balance) values(0,0,'cash',0,0.00,0.00)");
+		db.execSQL("insert into account(account_id,bank_id,account_number,account_name,fix_account_type_id,account_limit_usage,account_current_balance) values(0,0,'1','cash',0,0.00,0.00)");
 	}
 	//================================ Bank ==========================================
 	
@@ -269,8 +285,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public String addAccount(AccountObject accObj){
 		String accId = "";
 		SQLiteDatabase db = this.getWritableDatabase();
-		db.execSQL("insert into account(bank_id,account_name,account_type_id,account_limit_usage,account_current_balance) values(" 
-				+ accObj.getBankId()+",'"+accObj.getAccountName()+"',"+accObj.getAccountTypeId()+","+accObj.getLimitUsage()+","+accObj.getCurrentBalance()+")");
+		db.execSQL("insert into account(bank_id,account_name,account_number,fix_account_type_id,account_limit_usage,account_current_balance) values(" 
+				+ accObj.getBankId()+",'"+accObj.getAccountName()+"','"+accObj.getAccountNumber()+"',"+accObj.getAccountTypeId()+","+accObj.getLimitUsage()+","+accObj.getCurrentBalance()+")");
 		Cursor cur = db.rawQuery("Select MAX("+colAccountId+") As "+colAccountId+" from " + accountTable , null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
@@ -296,6 +312,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		ContentValues cv = new ContentValues();
 		cv.put(colbankId, Integer.parseInt(accObj.getBankId()));
 		cv.put(colAccountTypeId, Integer.parseInt(accObj.getAccountTypeId()));
+		cv.put(colAccountNumber, accObj.getAccountNumber());
 		cv.put(colAccountName, accObj.getAccountName());
 		cv.put(colAccountLimitUsage, Double.parseDouble(accObj.getLimitUsage()));
 		cv.put(colAccountCurrentBalance, Double.parseDouble(accObj.getCurrentBalance()));		
@@ -310,6 +327,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			while(cur.moveToNext()){
 				accObj = new AccountObject(); 
 				accObj.setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));
+				accObj.setAccountNumber(cur.getString(cur.getColumnIndex(colAccountNumber)));
 				accObj.setAccountName(cur.getString(cur.getColumnIndex(colAccountName)));
 				accObj.setBankId(Integer.toString(cur.getInt(cur.getColumnIndex(colbankId))));
 				accObj.setAccountTypeId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountTypeId))));
@@ -338,7 +356,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 		return category;
 	}	
-	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) โดย isPaid คือ รายรับ = false, รายจ่าย = true
+	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) 
 	public boolean calculateAccBalanceForAdd(String accId,String typeUsing,String amount)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -348,14 +366,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		Cursor cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"="+accId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
-			limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage));
 			curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance));
 		}
 		
 		curBalance += Double.parseDouble(amount);
 		
 		ContentValues cv = new ContentValues();
-		cv.put(colAccountLimitUsage, limit_usage);
 		cv.put(colAccountCurrentBalance, curBalance);
 		int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
 		if(rowEffected > 0)
@@ -377,7 +393,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return returnValue;
 		
 	}	
-	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) โดย isPaid คือ รายรับ = false, รายจ่าย = true
+	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน)
 	public boolean calculateAccBalanceForSameTypeEdit(String accId,String activityId,String typeUsing,String amount,String amountFromEdit)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -386,7 +402,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		double limit_usage = 0;
 		double curBalance = 0;
 		
-		Cursor cur = db.rawQuery("SELECT account_limit_usage,account_current_balance,account_type_id FROM " + accountTable +" WHERE "+colAccountId+"="+accId, null);
+		Cursor cur = db.rawQuery("SELECT account_limit_usage,account_current_balance,fix_account_type_id FROM " + accountTable +" WHERE "+colAccountId+"="+accId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
 			curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance))+Double.parseDouble(amount);
@@ -397,10 +413,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
 		
 		int oldTypeUsing = 0;
-		cur = db.rawQuery("SELECT type_using FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
+		cur = db.rawQuery("SELECT fix_account_type_using_id FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
-			oldTypeUsing = cur.getInt(cur.getColumnIndex(colActivityTypeUsing));
+			oldTypeUsing = cur.getInt(cur.getColumnIndex(colAccountTypeUsingId));
 		}
 
 		//ตรวจสอบว่าเป็นการถอนเงินใหมถ้าถอนก็ให้เอาไปบวกใน Cash ใช้ในการอัพเดทคงเหลือของ Cash 
@@ -449,7 +465,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return returnValue;
 		
 	}
-	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) โดย isPaid คือ รายรับ = false, รายจ่าย = true
+	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) 
 	public boolean calculateAccBalanceForDifferentTypeEdit(String accId,String activityId,String typeUsing,String amount,String amountFromEdit,String amountBeforEdit)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -469,10 +485,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
 		
 		int oldTypeUsing = 0;
-		cur = db.rawQuery("SELECT type_using FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
+		cur = db.rawQuery("SELECT fix_account_type_using_id FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
-			oldTypeUsing = cur.getInt(cur.getColumnIndex(colActivityTypeUsing));
+			oldTypeUsing = cur.getInt(cur.getColumnIndex(colAccountTypeUsingId));
 		}
 
 		//ตรวจสอบว่าเป็นการถอนเงินใหมถ้าถอนก็ให้เอาไปบวกใน Cash ใช้ในการอัพเดทคงเหลือของ Cash 
@@ -515,35 +531,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		
 	}
 	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) โดย isPaid คือ รายรับ = false, รายจ่าย = true เพื่อใช้ในส่วนของการลบกิจกรรม
-	public boolean calculateAccBalanceForDelete(String accId,boolean isPaid,String amount)
-			{
+	public boolean calculateAccBalanceForDelete(String accountId,String typeUsing,String amount)
+	{
 				SQLiteDatabase db = this.getWritableDatabase();
+				ContentValues cv;
 				boolean returnValue = false;
 				double limit_usage = 0;
 				double curBalance = 0;
-				Cursor cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"="+accId, null);
+				int rowEffected = 0;
+				Cursor cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"="+accountId, null);
 				if(cur.getCount() == 1){
 					cur.moveToFirst();
-					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage));
 					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance));
 				}
-				if(isPaid)
-				{
-					limit_usage += Double.parseDouble(amount);
-					curBalance += Double.parseDouble(amount);
-				}else{
-					curBalance -= Double.parseDouble(amount);
-				}		
 				
-				ContentValues cv = new ContentValues();
-				cv.put(colAccountLimitUsage, limit_usage);
+				if(typeUsing.equals("0"))//กรณีรับ
+				{
+					curBalance -= Double.parseDouble(amount);				
+				}
+				else if(typeUsing.equals("2"))//กรณีถอน
+				{				
+					cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+					cur.moveToFirst();
+					double cashlimit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage)) -  (Double.parseDouble(amount));
+					double casgcurBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) - (Double.parseDouble(amount));	
+					cv = new ContentValues();
+					cv.put(colAccountLimitUsage, cashlimit_usage);
+					cv.put(colAccountCurrentBalance, casgcurBalance);
+					rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);
+					//บวก จำนวนคงเหลือ กับ วงเงินในบัญชีนั้น ๆ
+					curBalance += Double.parseDouble(amount);
+				}
+				else//กรณีจ่าย
+				{
+					//บวก จำนวนคงเหลือ กับ วงเงินในบัญชีนั้น ๆ
+					curBalance += Double.parseDouble(amount);
+				}
+
+				cv = new ContentValues();
 				cv.put(colAccountCurrentBalance, curBalance);
-				int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
+				rowEffected = db.update(accountTable, cv, colAccountId + "=" + accountId, null);
 				if(rowEffected > 0)
 					returnValue = true;
 				return returnValue;
 				
-			}	
+	}	
 	//================================ Activity ===========================================
 	
 	
@@ -552,18 +584,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		boolean returnValue=false;
 		String activityId ="";
 		SQLiteDatabase db = this.getWritableDatabase();
-		db.execSQL("INSERT INTO activity(account_id,type_using,description,date,time,net_price) VALUES(" 
+		db.execSQL("INSERT INTO activity(account_id,fix_account_type_using_id,description,date,time,net_price) VALUES(" 
 				+ balObj.getAccountId()+","+balObj.getTypeUsing()+",'"+balObj.getDescription()+"','"+balObj.getDate()+"','"+balObj.getTime()+"',"+balObj.getNetPrice()+")");		
-		double editNetPrice = Double.parseDouble(balObj.getNetPrice());
+		double addNetPrice = Double.parseDouble(balObj.getNetPrice());
 		//ตรวจสอบว่าเป็นรายรับหรือรายจ่าย
-		if(!balObj.getTypeUsing().equals("0")) 				editNetPrice = editNetPrice*-1;				
-		return calculateAccBalanceForAdd(balObj.getAccountId(),balObj.getTypeUsing(),Double.toString(editNetPrice)) ;
+		if(!balObj.getTypeUsing().equals("0")) 				addNetPrice = addNetPrice*-1;				
+		return calculateAccBalanceForAdd(balObj.getAccountId(),balObj.getTypeUsing(),Double.toString(addNetPrice)) ;
 	}	
 	//ลบกิจกรรม ที่ละรายการ (กดปุ่ม x)
-	public void deleteActivity(String activityId,String accountId,boolean isPaid,String typeUsing){
+	public void deleteActivity(String activityId,String accountId,String typeUsing,String amount){
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.execSQL("DELETE FROM activity WHERE "+colActivityId+"="+activityId);
-		calculateAccBalanceForDelete(accountId,isPaid,typeUsing);
+		calculateAccBalanceForDelete(accountId,typeUsing,amount);
 	}
 	//แก้รายละเอียดของกิจกรรม
 	public void editActivity(BalanceObject balObj) {
@@ -572,7 +604,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues cv = new ContentValues();
 		cv.put(colAccountId, Integer.parseInt(balObj.getAccountId()));
-		cv.put(colActivityTypeUsing, Integer.parseInt(balObj.getTypeUsing()));
+		cv.put(colAccountTypeUsingId, Integer.parseInt(balObj.getTypeUsing()));
 		cv.put(colActivityDescription, balObj.getDescription());
 		cv.put(colActivityDate, balObj.getDate());
 		cv.put(colActivityTime, balObj.getTime());
@@ -605,7 +637,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public String getAmountExpenseInCurrentMonth(String month,String accountId){
 		String expenseAmount = ""; 
 		SQLiteDatabase db = this.getWritableDatabase();
-		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colActivityTypeUsing+" <> '0' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
 			expenseAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
@@ -623,7 +655,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				balObj = new BalanceObject(); 
 				balObj.setActivityId(Integer.toString(cur.getInt(cur.getColumnIndex(colActivityId))));
 				balObj.setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));//setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));
-				balObj.setTypeUsing(cur.getString(cur.getColumnIndex(colActivityTypeUsing)));//setBankId(Integer.toString(cur.getInt(cur.getColumnIndex(colbankId))));
+				balObj.setTypeUsing(cur.getString(cur.getColumnIndex(colAccountTypeUsingId)));//setBankId(Integer.toString(cur.getInt(cur.getColumnIndex(colbankId))));
 				balObj.setDescription(cur.getString(cur.getColumnIndex(colActivityDescription)));//setAccountTypeId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountTypeId))));
 				balObj.setDate(cur.getString(cur.getColumnIndex(colActivityDate)));//setCurrentBalance((Double.toString(cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)))));
 				balObj.setTime(cur.getString(cur.getColumnIndex(colActivityTime)));
@@ -646,7 +678,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			balObj = new BalanceObject(); 
 			balObj.setActivityId(Integer.toString(cur.getInt(cur.getColumnIndex(colActivityId))));
 			balObj.setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));//setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));
-			balObj.setTypeUsing(cur.getString(cur.getColumnIndex(colActivityTypeUsing)));//setBankId(Integer.toString(cur.getInt(cur.getColumnIndex(colbankId))));
+			balObj.setTypeUsing(cur.getString(cur.getColumnIndex(colAccountTypeUsingId)));//setBankId(Integer.toString(cur.getInt(cur.getColumnIndex(colbankId))));
 			balObj.setDescription(cur.getString(cur.getColumnIndex(colActivityDescription)));//setAccountTypeId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountTypeId))));
 			balObj.setDate(cur.getString(cur.getColumnIndex(colActivityDate)));//setCurrentBalance((Double.toString(cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)))));
 			balObj.setTime(cur.getString(cur.getColumnIndex(colActivityTime)));
@@ -670,7 +702,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	/*public ContentValues putBalObjToContentValue(BalanceObject balObj){
 		cv = new ContentValues();
 		cv.put(colAccountId, Integer.parseInt(balObj.getAccountId()));
-		cv.put(colActivityTypeUsing, balObj.getTypeUsing());
+		cv.put(colAccountTypeUsingId, balObj.getTypeUsing());
 		cv.put(colActivityDescription, balObj.getDescription());
 		cv.put(colActivityPathUsing, balObj.getPathUsing());
 		cv.put(colActivityDate, balObj.getDate());

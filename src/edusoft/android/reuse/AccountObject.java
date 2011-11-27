@@ -6,6 +6,7 @@ public class AccountObject {
 	
 	private String bankId = "";
 	private String accountId = "";
+	private String accountNumber = "";
 	private String accountName = "";
 	private String accountTypeId = "";
 	private String limitUsage = "";
@@ -20,6 +21,12 @@ public class AccountObject {
 	}
 	public void setAccountId(String accountId){
 		this.accountId = accountId;
+	} 
+	public String getAccountNumber(){
+		return accountNumber;
+	}
+	public void setAccountNumber(String accountNumber){
+		this.accountNumber = accountNumber;
 	} 
 	public String getAccountName(){
 		return accountName;

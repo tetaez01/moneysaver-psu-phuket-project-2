@@ -440,6 +440,7 @@ public class BalanceActivity extends Activity {
 					holder.description = (TextView) convertView.findViewById(R.id.listview_data_list_layout_description);
 					holder.date = (TextView) convertView.findViewById(R.id.listview_data_list_layout_date);
 					holder.time = (TextView) convertView.findViewById(R.id.listview_data_list_layout_time);
+					holder.edit = (Button) convertView.findViewById(R.id.listview_data_list_layout_ButtonEdit);
 					holder.delete = (Button) convertView.findViewById(R.id.listview_data_list_layout_ButtonDelete);
 					holder.amount = (TextView) convertView.findViewById(R.id.listview_data_list_layout_amount);
 					holder.typeUsingIMG = (ImageView) convertView.findViewById(R.id.listview_data_list_layout_imgTypeUsinng);
@@ -469,6 +470,10 @@ public class BalanceActivity extends Activity {
 					holder.amount.setTextColor(Color.rgb(224, 88, 24));
 				}
 				//ปุ่ม กากบาท เพื่อใช้ในการลบข้อมูลกิจกรรม
+				holder.edit.setFocusableInTouchMode(false);
+				holder.edit.setFocusable(false);
+				holder.edit.setTag(position);
+				//ปุ่ม กากบาท เพื่อใช้ในการลบข้อมูลกิจกรรม
 				holder.delete.setFocusableInTouchMode(false);
 				holder.delete.setFocusable(false);
 				holder.delete.setTag(position);
@@ -487,10 +492,7 @@ public class BalanceActivity extends Activity {
 									public void onClick(DialogInterface dialog,int id) {
 										hm = new HashMap<String, Object>();
 										hm = listview_data.get(row);
-										boolean isPaid = true;
-										if(hm.get(TYPEUSINGKEY).equals("0"))
-											isPaid = false;
-										dbHelp.deleteActivity((String) hm.get(ACTIVITYIDKEY),(String) hm.get(ACCOUNTIDKEY),isPaid,(String) hm.get(AMOUNTKEY));
+										dbHelp.deleteActivity((String) hm.get(ACTIVITYIDKEY),(String) hm.get(ACCOUNTIDKEY),(String) hm.get(TYPEUSINGKEY),(String) hm.get(AMOUNTKEY));
 										listview_data.remove(row);
 										listLayout.notifyDataSetChanged();
 										dialog.dismiss();
@@ -523,6 +525,7 @@ public class BalanceActivity extends Activity {
 			TextView description;
 			TextView date;
 			TextView time;
+			Button edit;
 			Button delete;
 			TextView amount;
 		}

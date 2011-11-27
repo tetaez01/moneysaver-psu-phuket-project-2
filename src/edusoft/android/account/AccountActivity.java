@@ -53,6 +53,7 @@ public class AccountActivity extends Activity {
 	private static final String ACCOUNTIDKEY = "accid";
 	private static final String IMGKEY = "image";
 	private static final String BANKIDKEY = "bankname";
+	private static final String ACCOUNTNUMBERKEY =  "accountnumber";
 	private static final String ACCOUNTNAMEKEY =  "accountname";
 	private static final String CATEGORYIDKEY = "category";
 	private static final String CURRENTBALANCEKEY = "current_balance";
@@ -115,11 +116,12 @@ public class AccountActivity extends Activity {
 				accObj = new AccountObject();
 				accObj.setBankId((String) listview_data.get(position).get(BANKIDKEY));
 				accObj.setAccountId((String) listview_data.get(position).get(ACCOUNTIDKEY));
+				accObj.setAccountNumber((String) listview_data.get(position).get(ACCOUNTNUMBERKEY));
 				accObj.setAccountName((String) listview_data.get(position).get(ACCOUNTNAMEKEY));
 				accObj.setAccountTypeId((String) listview_data.get(position).get(CATEGORYIDKEY));
 				accObj.setCurrentBalance((String) listview_data.get(position).get(CURRENTBALANCEKEY));
 				accObj.setLimitUsage((String) listview_data.get(position).get(LIMITKEY));
-				if(position > 0){
+				if(position > 0){					
 					showAccountDialog(true,position, accObj);
 				}else{
 					final int index = position;
@@ -181,7 +183,8 @@ public class AccountActivity extends Activity {
 			accObj = (AccountObject) accList.get(i);
 			
 			hm.put(BANKIDKEY,accObj.getBankId()); //dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym());
-			hm.put(ACCOUNTIDKEY, accObj.getAccountId());				
+			hm.put(ACCOUNTIDKEY, accObj.getAccountId());	
+			hm.put(ACCOUNTNUMBERKEY, accObj.getAccountNumber());
 			hm.put(ACCOUNTNAMEKEY, accObj.getAccountName());
 			hm.put(IMGKEY, getResources().getIdentifier(dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym(), "drawable",getPackageName()));
 			hm.put(CATEGORYIDKEY, accObj.getAccountTypeId());//dbHelp.getAccTypeByAccountTypeId(accObj.getAccountTypeId()).getAccountType());
@@ -189,12 +192,15 @@ public class AccountActivity extends Activity {
 			hm.put(CURRENTDATEKEY, new Utility().getCurrentDate());
 			hm.put(INCOMEKEY, new Utility().addDecimal(accObj.getCurrentBalance()));
 			hm.put(LIMITKEY, new Utility().addDecimal(accObj.getLimitUsage()));
-			hm.put(EXPENSEKEY, new Utility().addDecimal("0.00"));
+			
 			//ดึงรายการจ่ายทั้งหมดของ บัญชีนั้น ๆ มา
 			String expense = new Utility().addDecimal(dbHelp.getAmountExpenseInCurrentMonth(new Utility().getCurrentMonth(),accObj.getAccountId()));
+			
+			hm.put(EXPENSEKEY, expense);
+			
+			
 			//วงเงินจำกัดของบัญชีนั้น ๆ 
 			String limitUsage = new Utility().addDecimal(accObj.getLimitUsage());
-
 			if (calculatePercentage(limitUsage, expense) == 100)
 				hm.put(PERCENTAGEKEY, calculatePercentage(new Utility().addDecimal(accObj.getLimitUsage()), expense));
 			else
@@ -210,7 +216,7 @@ public class AccountActivity extends Activity {
 	 * ถ้า isEdit = false แปลว่า การทำงานมาจาก คลิกปุ่ม + เพื่อเพิ่มบัญชี
 	 */
 	private void showAccountDialog(Boolean isEdit,int position, AccountObject accounObject) {
-		try {
+		try {			
 			final int row = position;
 			accObj = accounObject;
 			final boolean canEdit = isEdit;
@@ -224,6 +230,7 @@ public class AccountActivity extends Activity {
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			bankNameSpinner.setAdapter(adapter);
 			
+			final EditText accountDialog_EditTextAccountNumber = (EditText) dialog.findViewById(R.id.accountDialog_EditTextAccountNumber);
 			final EditText accountDialog_EditTextAccountName = (EditText) dialog.findViewById(R.id.accountDialog_EditTextAccountName);	
 			
 			final Spinner categorySpinner = (Spinner) dialog.findViewById(R.id.accountDialog_SpinnerCategory);
@@ -235,8 +242,10 @@ public class AccountActivity extends Activity {
 			final EditText accountDialog_EditTextLimited = (EditText) dialog.findViewById(R.id.accountDialog_EditTextLimited);
 			
 			if(canEdit){
+				
 				dialog.setTitle("แก้ไขบัญชี");
 				bankNameSpinner.setSelection(Integer.parseInt(accObj.getBankId())-1);
+				accountDialog_EditTextAccountNumber.setText(accObj.getAccountNumber());
 				accountDialog_EditTextAccountName.setText(accObj.getAccountName());
 				categorySpinner.setSelection(Integer.parseInt(accObj.getAccountTypeId())-1);
 				accountDialog_EditTextAmount.setText(new Utility().addDecimal(accObj.getCurrentBalance()));
@@ -255,15 +264,18 @@ public class AccountActivity extends Activity {
 						
 						accObj.setBankId(Integer.toString(bankNameSpinner.getSelectedItemPosition()+1));
 						accObj.setAccountId(accObj.getAccountId());
+						accObj.setAccountNumber(accountDialog_EditTextAccountNumber.getText().toString());
 						accObj.setAccountName(accountDialog_EditTextAccountName.getText().toString());
 						accObj.setAccountTypeId(Integer.toString(categorySpinner.getSelectedItemPosition()+1));
 						accObj.setCurrentBalance(accountDialog_EditTextAmount.getText().toString());
 						accObj.setLimitUsage(accountDialog_EditTextLimited.getText().toString());
 						
 						hm.put(BANKIDKEY, accObj.getBankId());//bankAcronym);
+						hm.put(ACCOUNTNUMBERKEY, accObj.getAccountNumber());
 						hm.put(ACCOUNTNAMEKEY, accObj.getAccountName());
 						hm.put(IMGKEY, getResources().getIdentifier(dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym(), "drawable", getPackageName()));
 						hm.put(CATEGORYIDKEY, accObj.getAccountTypeId());//dbHelp.getAccTypeByAccountTypeId(accObj.getAccountTypeId()).getAccountType());
+						hm.put(CURRENTBALANCEKEY,accObj.getCurrentBalance());
 						hm.put(CURRENTDATEKEY, new Utility().getCurrentDate());
 						hm.put(INCOMEKEY, new Utility().addDecimal(accObj.getCurrentBalance()));
 						hm.put(LIMITKEY, new Utility().addDecimal(accObj.getLimitUsage()));
@@ -273,10 +285,9 @@ public class AccountActivity extends Activity {
 						else
 							hm.put(PERCENTAGEKEY, 100.00 - calculatePercentage("0.00", "0.00"));
 						
-						if(canEdit){
-							Toast.makeText(getApplicationContext(),accObj.getBankId()+","+accObj.getAccountName()+","+accObj.getAccountTypeId()+","+accObj.getCurrentBalance()+","+accObj.getLimitUsage(), Toast.LENGTH_SHORT).show();
+						if(canEdit){							
 							dbHelp.editLimitedUsageForAccount(accObj);
-							hm.put(ACCOUNTIDKEY, accObj.getAccountId());
+							hm.put(ACCOUNTIDKEY, accObj.getAccountId());							
 							listview_data.set(row, hm);
 						}else{
 							hm.put(ACCOUNTIDKEY, dbHelp.addAccount(accObj));
@@ -361,7 +372,8 @@ public class AccountActivity extends Activity {
 					holder.expenseAmount = (TextView) convertView.findViewById(R.id.listDataLayout_expenseAmount);
 					holder.IncomeAmount = (TextView) convertView.findViewById(R.id.listDataLayout_IncomeAmount);
 					holder.limit = (TextView) convertView.findViewById(R.id.listDataLayout_Limit);
-					holder.delete = (Button) convertView.findViewById(R.id.listDataLayout_ButtonDelete);
+					holder.edit = (Button) convertView.findViewById(R.id.listDataLayout_ButtonEdit);
+					holder.delete = (Button) convertView.findViewById(R.id.listDataLayout_ButtonDelete);					
 					holder.percentage = (ProgressBar) convertView.findViewById(R.id.listDataLayout_percentage);
 					convertView.setTag(holder);
 				} else {
@@ -377,6 +389,10 @@ public class AccountActivity extends Activity {
 				holder.IncomeAmount.setText((String) listview_data.get(position).get(INCOMEKEY));
 				holder.limit.setText((String) listview_data.get(position).get(LIMITKEY));
 				holder.percentage.setProgress(((Integer) listview_data.get(position).get(PERCENTAGEKEY)));
+				//ปุ่ม ดินสอ เพื่อใช้ในการแก้ไขบัญชี
+				holder.edit.setFocusableInTouchMode(false);
+				holder.edit.setFocusable(false);
+				holder.edit.setTag(position);
 				//ปุ่ม กากบาท เพื่อใช้ในการลบบัญชี
 				holder.delete.setFocusableInTouchMode(false);
 				holder.delete.setFocusable(false);
@@ -431,6 +447,7 @@ public class AccountActivity extends Activity {
 			TextView expenseAmount;
 			TextView IncomeAmount;
 			TextView limit;
+			Button edit;
 			Button delete;
 			ProgressBar percentage;
 		}
