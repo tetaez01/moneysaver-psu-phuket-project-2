@@ -29,7 +29,7 @@ public class MoneySaverMain extends TabActivity {
 			intent = new Intent().setClass(this, AccountActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			
 			// Initialize a TabSpec for each tab and add it to the TabHost
-			spec = tabHost.newTabSpec("สมุดบัญชี").setIndicator("สมุดบัญชี",
+			spec = tabHost.newTabSpec("หน้าหลัก").setIndicator("หน้าหลัก",
 					res.getDrawable(R.layout.ic_tab_account))
 					.setContent(intent);
 			tabHost.addTab(spec);
@@ -45,6 +45,11 @@ public class MoneySaverMain extends TabActivity {
 			intent = new Intent().setClass(this, ReportActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			spec = tabHost.newTabSpec("รายงาน").setIndicator("รายงาน",
 					res.getDrawable(R.layout.ic_tab_report)).setContent(intent);
+			tabHost.addTab(spec);
+			
+			intent = new Intent().setClass(this, ReportActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			spec = tabHost.newTabSpec("เสริม").setIndicator("เสริม",
+					res.getDrawable(R.layout.ic_tab_other)).setContent(intent);
 			tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
