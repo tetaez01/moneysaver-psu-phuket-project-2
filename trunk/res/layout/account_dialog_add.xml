@@ -9,6 +9,12 @@
 			android:layout_width="wrap_content" />
 		<Spinner android:id="@+id/accountDialog_SpinnerBankName" android:prompt="@string/bankname"
 			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+		<TextView android:id="@+id/accountDialog_TextAccountNumber"
+			android:text="เลขบัญชี  : " android:layout_height="wrap_content"
+			android:layout_width="wrap_content" />
+		<EditText android:id="@+id/accountDialog_EditTextAccountNumber"
+			android:text="" android:layout_height="wrap_content"
+			android:layout_width="fill_parent" />
 		<TextView android:id="@+id/accountDialog_TextViewAccountName"
 			android:text="ชื่อบัญชี  : " android:layout_height="wrap_content"
 			android:layout_width="wrap_content" />
@@ -20,19 +26,31 @@
 			android:layout_height="wrap_content" />
 		<Spinner android:id="@+id/accountDialog_SpinnerCategory" android:prompt="@string/category"
 			android:layout_width="fill_parent" android:layout_height="wrap_content" />
-		<TextView android:id="@+id/accountDialog_TextViewAmount"
-			android:text="ยอดเงินปัจจุบัน : " android:layout_width="wrap_content"
-			android:layout_height="wrap_content" />
-		<EditText android:id="@+id/accountDialog_EditTextAmount"
+			
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			android:gravity="left">
+			<TextView android:id="@+id/accountDialog_TextViewAmount" android:layout_weight="0.5"
+				android:text="ยอดเงินปัจจุบัน  " android:layout_width="50dip"
+				android:layout_height="wrap_content" />
+			
+	
+			<TextView android:id="@+id/accountDialog_TextViewLimited" android:layout_weight="0.5"
+				android:text="จำกัดวงเงินที่ใช้ " android:layout_height="wrap_content"
+				android:layout_width="0dip" />
+		
+		</LinearLayout>
+		
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="fill_parent" android:layout_height="wrap_content" 
+			android:gravity="left">
+			<EditText android:id="@+id/accountDialog_EditTextAmount"  android:layout_weight="0.5"
 			android:text="" android:layout_height="wrap_content"
-			android:layout_width="fill_parent" />
-
-		<TextView android:id="@+id/accountDialog_TextViewLimited"
-			android:text="จำกัดวงเงินที่ใช้ :" android:layout_height="wrap_content"
-			android:layout_width="wrap_content" />
-		<EditText android:id="@+id/accountDialog_EditTextLimited"
-			android:text="" android:layout_width="fill_parent"
+			android:layout_width="0dip" />
+			<EditText android:id="@+id/accountDialog_EditTextLimited" android:layout_weight="0.5"
+			android:text="" android:layout_width="0dip"
 			android:layout_height="wrap_content" />
+		</LinearLayout>
 
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 			android:layout_width="fill_parent" android:layout_height="wrap_content" 
