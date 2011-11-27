@@ -9,7 +9,7 @@ public class ReportActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         TextView textview = new TextView(this);
-        textview.setText("This is the Report tab");
+        textview.setText("This is the Other tab");
         setContentView(textview);
     }
 }
