@@ -26,6 +26,9 @@
 					android:layout_height="20dip"
 					android:id="@+id/listview_data_list_layout_imgTypeUsinng" />
 				<Button android:id="@+id/listview_data_list_layout_ButtonDelete"
+					android:textColor="#FFFFFF" android:background="@drawable/edit_icon"
+					android:layout_height="15dip" android:layout_width="15dip" />	
+				<Button android:id="@+id/listview_data_list_layout_ButtonDelete"
 					android:textColor="#FFFFFF" android:background="@drawable/delete_icon"
 					android:layout_height="15dip" android:layout_width="15dip" />
 			</LinearLayout>
