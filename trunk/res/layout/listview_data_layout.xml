@@ -36,7 +36,7 @@
 				android:layout_height="wrap_content" android:layout_gravity="right">
 				<TextView android:layout_width="wrap_content"
 					android:typeface="serif" android:layout_height="wrap_content"
-					android:textSize="12dip" android:text = "รายรับ  :"
+					android:textSize="12dip" android:text = "คงเหลือ :"
 					android:textColor="#52B804" android:textStyle="bold" />
 				<TextView android:layout_width="fill_parent"
 					android:typeface="serif" android:layout_height="wrap_content"

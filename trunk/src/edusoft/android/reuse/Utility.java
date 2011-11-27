@@ -13,7 +13,7 @@ import edusoft.android.main.R;
 public class Utility extends Activity{
 	boolean isNull = false;
 	boolean isNotNull = false;
-	//Toast.makeText(getApplicationContext(),dbHelp.getBankAcronymByAccountId(balanceObject.getAccountId()), Toast.LENGTH_SHORT).show();
+	//Toast.makeText(getApplicationContext(),dbHelp.getBankAcronymByAccountId(balanceObject.getAccountId()), Toast.LENGTH_LONG).show();
 	public boolean isNull(String value) {
 		if (value == "" || value == null)
 			isNull = true;
