@@ -137,22 +137,7 @@ public class BalanceActivity extends Activity {
 	private AdapterView.OnItemClickListener balanceEdit = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			try {
-				balanceObject = new BalanceObject();
-				balanceObject.setActivityId((String) listview_data.get(position).get(ACTIVITYIDKEY));
-				balanceObject.setAccountId((String) listview_data.get(position).get(ACCOUNTIDKEY));
-				balanceObject.setNetPrice((String) listview_data.get(position).get(AMOUNTKEY));
-				balanceObject.setDate((String) listview_data.get(position).get(DATEKEY));
-				balanceObject.setDescription((String) listview_data.get(position).get(DESCRIPTIONKEY));
-				balanceObject.setTypeUsing((String) listview_data.get(position).get(TYPEUSINGKEY));
-				balanceObject.setTime((String) listview_data.get(position).get(TIMEKEY));
-				showBalanceDialog(true,balanceObject);
-			} catch (Exception e) {
-				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
-				b.setMessage(e.toString());
-				b.show();
-
-			}
+			
 		}
 	};
 
@@ -473,6 +458,26 @@ public class BalanceActivity extends Activity {
 				holder.edit.setFocusableInTouchMode(false);
 				holder.edit.setFocusable(false);
 				holder.edit.setTag(position);
+				holder.edit.setOnClickListener(new OnClickListener() {					
+					@Override
+					public void onClick(View v) {
+						try {
+							balanceObject = new BalanceObject();
+							balanceObject.setActivityId((String) listview_data.get(row).get(ACTIVITYIDKEY));
+							balanceObject.setAccountId((String) listview_data.get(row).get(ACCOUNTIDKEY));
+							balanceObject.setNetPrice((String) listview_data.get(row).get(AMOUNTKEY));
+							balanceObject.setDate((String) listview_data.get(row).get(DATEKEY));
+							balanceObject.setDescription((String) listview_data.get(row).get(DESCRIPTIONKEY));
+							balanceObject.setTypeUsing((String) listview_data.get(row).get(TYPEUSINGKEY));
+							balanceObject.setTime((String) listview_data.get(row).get(TIMEKEY));
+							showBalanceDialog(true,balanceObject);
+						} catch (Exception e) {
+							AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
+							b.setMessage(e.toString());
+							b.show();
+						}					
+					}
+				});
 				//ปุ่ม กากบาท เพื่อใช้ในการลบข้อมูลกิจกรรม
 				holder.delete.setFocusableInTouchMode(false);
 				holder.delete.setFocusable(false);

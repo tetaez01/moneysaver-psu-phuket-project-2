@@ -112,64 +112,7 @@ public class AccountActivity extends Activity {
 	//การทำงานเมื่อคลิกข้อมูลแต่ละแถว
 	private AdapterView.OnItemClickListener accountEdit = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
-			try {
-				accObj = new AccountObject();
-				accObj.setBankId((String) listview_data.get(position).get(BANKIDKEY));
-				accObj.setAccountId((String) listview_data.get(position).get(ACCOUNTIDKEY));
-				accObj.setAccountNumber((String) listview_data.get(position).get(ACCOUNTNUMBERKEY));
-				accObj.setAccountName((String) listview_data.get(position).get(ACCOUNTNAMEKEY));
-				accObj.setAccountTypeId((String) listview_data.get(position).get(CATEGORYIDKEY));
-				accObj.setCurrentBalance((String) listview_data.get(position).get(CURRENTBALANCEKEY));
-				accObj.setLimitUsage((String) listview_data.get(position).get(LIMITKEY));
-				if(position > 0){					
-					showAccountDialog(true,position, accObj);
-				}else{
-					final int index = position;
-					hm = new HashMap<String, Object>();
-					hm = listview_data.get(position);				
-					int bank_image = (Integer) listview_data.get(position).get(IMGKEY);
-					final Dialog dialog = new Dialog(AccountActivity.this);
-					dialog.setContentView(R.layout.account_dialog_edit);
-					dialog.setTitle("แก้ไขวงเงิน");
-					dialog.setCancelable(true);
-	
-					ImageView bankImage = (ImageView) dialog.findViewById(R.id.account_dialog_edit_bankimg);
-					bankImage.setImageResource(bank_image);
-					TextView bankName = (TextView) dialog.findViewById(R.id.account_dialog_edit_bankname);
-					bankName.setText(dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym());
-					final EditText limitEdit = (EditText) dialog.findViewById(R.id.account_dialog_edit_limit);
-					limitEdit.setText(accObj.getLimitUsage());
-					Button SubmitButton = (Button) dialog.findViewById(R.id.account_dialog_edit_ButtonSubmit);
-					SubmitButton.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							try {
-								dbHelp.editLimitedUsageForCash(Integer.parseInt((String) hm.get(ACCOUNTIDKEY)),Double.parseDouble(limitEdit.getText().toString()));					
-								hm.put(LIMITKEY, new Utility().addDecimal(limitEdit.getText().toString()));
-								listview_data.set(index, hm);
-								listLayout.notifyDataSetChanged();
-								dialog.dismiss();
-							} catch (Exception e) {
-								AlertDialog.Builder b = new AlertDialog.Builder(AccountActivity.this);
-								b.setMessage(e.toString());
-								b.show();
-							}
-						}
-					});
-					Button CancelButton = (Button) dialog.findViewById(R.id.account_dialog_edit_ButtonCancel);
-					CancelButton.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							dialog.cancel();
-						}
-					});
-					dialog.show();
-				}
-			} catch (Exception e) {
-				AlertDialog.Builder b = new AlertDialog.Builder(AccountActivity.this);
-				b.setMessage(e.toString());
-				b.show();
-			}
+			
 		}
 	};
 	
@@ -393,6 +336,70 @@ public class AccountActivity extends Activity {
 				holder.edit.setFocusableInTouchMode(false);
 				holder.edit.setFocusable(false);
 				holder.edit.setTag(position);
+				holder.edit.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						try {
+							accObj = new AccountObject();
+							accObj.setBankId((String) listview_data.get(row).get(BANKIDKEY));
+							accObj.setAccountId((String) listview_data.get(row).get(ACCOUNTIDKEY));
+							accObj.setAccountNumber((String) listview_data.get(row).get(ACCOUNTNUMBERKEY));
+							accObj.setAccountName((String) listview_data.get(row).get(ACCOUNTNAMEKEY));
+							accObj.setAccountTypeId((String) listview_data.get(row).get(CATEGORYIDKEY));
+							accObj.setCurrentBalance((String) listview_data.get(row).get(CURRENTBALANCEKEY));
+							accObj.setLimitUsage((String) listview_data.get(row).get(LIMITKEY));
+							if(row > 0){					
+								showAccountDialog(true,row, accObj);
+							}else{
+								final int index = row;
+								hm = new HashMap<String, Object>();
+								hm = listview_data.get(row);				
+								int bank_image = (Integer) listview_data.get(row).get(IMGKEY);
+								final Dialog dialog = new Dialog(AccountActivity.this);
+								dialog.setContentView(R.layout.account_dialog_edit);
+								dialog.setTitle("แก้ไขวงเงิน");
+								dialog.setCancelable(true);
+				
+								ImageView bankImage = (ImageView) dialog.findViewById(R.id.account_dialog_edit_bankimg);
+								bankImage.setImageResource(bank_image);
+								TextView bankName = (TextView) dialog.findViewById(R.id.account_dialog_edit_bankname);
+								bankName.setText(dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym());
+								final EditText limitEdit = (EditText) dialog.findViewById(R.id.account_dialog_edit_limit);
+								limitEdit.setText(accObj.getLimitUsage());
+								Button SubmitButton = (Button) dialog.findViewById(R.id.account_dialog_edit_ButtonSubmit);
+								SubmitButton.setOnClickListener(new OnClickListener() {
+									@Override
+									public void onClick(View v) {
+										try {
+											dbHelp.editLimitedUsageForCash(Integer.parseInt((String) hm.get(ACCOUNTIDKEY)),Double.parseDouble(limitEdit.getText().toString()));					
+											hm.put(LIMITKEY, new Utility().addDecimal(limitEdit.getText().toString()));
+											listview_data.set(index, hm);
+											listLayout.notifyDataSetChanged();
+											dialog.dismiss();
+										} catch (Exception e) {
+											AlertDialog.Builder b = new AlertDialog.Builder(AccountActivity.this);
+											b.setMessage(e.toString());
+											b.show();
+										}
+									}
+								});
+								Button CancelButton = (Button) dialog.findViewById(R.id.account_dialog_edit_ButtonCancel);
+								CancelButton.setOnClickListener(new OnClickListener() {
+									@Override
+									public void onClick(View v) {
+										dialog.cancel();
+									}
+								});
+								dialog.show();
+							}
+						} catch (Exception e) {
+							AlertDialog.Builder b = new AlertDialog.Builder(AccountActivity.this);
+							b.setMessage(e.toString());
+							b.show();
+						}
+					}
+				});
+				
 				//ปุ่ม กากบาท เพื่อใช้ในการลบบัญชี
 				holder.delete.setFocusableInTouchMode(false);
 				holder.delete.setFocusable(false);
