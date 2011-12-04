@@ -12,6 +12,7 @@ import edusoft.android.reuse.AccountObject;
 import edusoft.android.reuse.AccountTypeObject;
 import edusoft.android.reuse.BalanceObject;
 import edusoft.android.reuse.BankObject;
+import edusoft.android.reuse.FixAccountType;
 import edusoft.android.reuse.Utility;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -112,7 +113,56 @@ public class AccountActivity extends Activity {
 	//การทำงานเมื่อคลิกข้อมูลแต่ละแถว
 	private AdapterView.OnItemClickListener accountEdit = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
-			
+			try {
+				Toast.makeText(getApplicationContext(),"sdfsdf", Toast.LENGTH_LONG).show();
+				accObj = new AccountObject();
+				accObj.setBankId((String) listview_data.get(position).get(BANKIDKEY));
+				accObj.setAccountId((String) listview_data.get(position).get(ACCOUNTIDKEY));
+				accObj.setAccountNumber((String) listview_data.get(position).get(ACCOUNTNUMBERKEY));
+				accObj.setAccountName((String) listview_data.get(position).get(ACCOUNTNAMEKEY));
+				accObj.setAccountTypeId((String) listview_data.get(position).get(CATEGORYIDKEY));
+				accObj.setCurrentBalance((String) listview_data.get(position).get(CURRENTBALANCEKEY));
+				accObj.setLimitUsage((String) listview_data.get(position).get(LIMITKEY));
+				
+				final int index = position;
+				hm = new HashMap<String, Object>();
+				hm = listview_data.get(position);				
+				final Dialog dialog = new Dialog(AccountActivity.this);
+				dialog.setContentView(R.layout.account_dialog_data);
+				dialog.setTitle("ข้อมูลบัญชี");
+				dialog.setCancelable(true);
+				
+				String accDesc = "เลขที่บัญชี :"+ accObj.getAccountNumber()+"\n\n"+
+				                 "ชื่อบัญชี :" + accObj.getAccountName() + "\n\n"+
+				                 "ประเภทบัญชี :";
+				if(accObj.getAccountTypeId().equals(FixAccountType.FIX_CASH_ACCOUNT_ID))
+					accDesc +=(FixAccountType.FIX_CASH_ACCOUNT_DESCRIPTION+"\n\n");
+				else if(accObj.getAccountTypeId().equals(FixAccountType.FIX_CURRENT_ACCOUNT_ID))
+					accDesc +=(FixAccountType.FIX_CURRENT_ACCOUNT_DESCRIPTION+"\n\n");
+				else if(accObj.getAccountTypeId().equals(FixAccountType.FIX_SAVING_ACCOUNT_ID))
+					accDesc +=(FixAccountType.FIX_SAVING_ACCOUNT_DESCRIPTION+"\n\n");
+				else if(accObj.getAccountTypeId().equals(FixAccountType.FIX_DEPOSIT_ACCOUNT_ID))
+					accDesc +=(FixAccountType.FIX_DEPOSIT_ACCOUNT_DESCRIPTION+"\n\n");
+				
+				accDesc = accDesc +"ยอดเงินคงเหลือ :"+ accObj.getCurrentBalance()+"\n\n"+
+						  "วงเงินจำกัด :"+accObj.getLimitUsage();
+							
+				TextView accountDescription = (TextView) dialog.findViewById(R.id.account_dialog_data_view);
+				accountDescription.setText(accDesc);
+				
+				Button SubmitButton = (Button) dialog.findViewById(R.id.account_dialog_data_okButton);
+				SubmitButton.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						dialog.dismiss();
+					}
+				});				
+				dialog.show();
+			} catch (Exception e) {
+				AlertDialog.Builder b = new AlertDialog.Builder(AccountActivity.this);
+				b.setMessage(e.toString());
+				b.show();
+			}
 		}
 	};
 	
