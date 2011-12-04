@@ -15,6 +15,7 @@ import edusoft.android.reuse.AccountObject;
 import edusoft.android.reuse.AccountTypeObject;
 import edusoft.android.reuse.BalanceObject;
 import edusoft.android.reuse.BankObject;
+import edusoft.android.reuse.FixTypeUsing;
 import edusoft.android.reuse.Utility;
 import android.content.ContentValues;
 import android.content.Context;
@@ -530,6 +531,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		return returnValue;
 		
 	}
+	// คำนวนบัญชีเดิมก่อนที่จะแก้ไขเป็นยัญชีใหม่ 
+	public boolean calculateAccBalanceForDifferentPathUsingEdit(BalanceObject oldBalObj,BalanceObject newBalObj){
+		SQLiteDatabase db = this.getWritableDatabase();
+		ContentValues cv = new ContentValues();
+		boolean returnValue = false;
+		int rowEffected=0;
+		double curBalance = 0;
+		double limitUsage = 0;
+		double amount=Double.parseDouble(newBalObj.getNetPrice());;
+		Cursor cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"="+oldBalObj.getAccountId(), null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance));
+			limitUsage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage));
+		}
+		
+		if(oldBalObj.getTypeUsing().equals(FixTypeUsing.fixIncome))
+		{
+			curBalance -= Double.parseDouble(oldBalObj.getNetPrice());
+		}
+		else
+		{
+			curBalance += Double.parseDouble(oldBalObj.getNetPrice());
+			limitUsage += Double.parseDouble(oldBalObj.getNetPrice());
+		}
+		cv = new ContentValues();
+		cv.put(colAccountLimitUsage, limitUsage);
+		cv.put(colAccountCurrentBalance, curBalance);
+		//ถอน เป็น ถอน แต่เปลี่ยนบัญชี
+		if(oldBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw) && newBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw))
+			amount = Double.parseDouble(oldBalObj.getNetPrice())- Double.parseDouble(newBalObj.getNetPrice());
+		else if(!newBalObj.getTypeUsing().equals("0")) 				
+			amount = amount*-1;
+		rowEffected = db.update(accountTable, cv, colAccountId + "="+oldBalObj.getAccountId(), null);	
+		calculateAccBalanceForAdd(newBalObj.getAccountId(),newBalObj.getTypeUsing(),Double.toString(amount));
+		if(rowEffected > 0)
+			returnValue = true;
+		return returnValue;
+	}
 	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) โดย isPaid คือ รายรับ = false, รายจ่าย = true เพื่อใช้ในส่วนของการลบกิจกรรม
 	public boolean calculateAccBalanceForDelete(String accountId,String typeUsing,String amount)
 	{
@@ -609,27 +649,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		cv.put(colActivityDate, balObj.getDate());
 		cv.put(colActivityTime, balObj.getTime());
 		cv.put(colActivityNetPrice, Double.parseDouble(balObj.getNetPrice()));
-		
-		
-		 // จ่าย เป็น จ่าย (แค่เปลี่ยนตัวเลข) หรือ รับ เป็น รับ (แค่เปลี่ยนตัวเลข)
-		if((Integer.parseInt(balDetail.getTypeUsing()) == 0 && Integer.parseInt(balObj.getTypeUsing()) == 0) ||
-		  (Integer.parseInt(balDetail.getTypeUsing()) > 0 && Integer.parseInt(balObj.getTypeUsing()) > 0)	)
+		//แก้ไขบัญชีเดียวกัน
+		if(balDetail.getAccountId().equals(balObj.getAccountId()))
 		{
-			double editNetPrice = (Double.parseDouble(balDetail.getNetPrice()) - Double.parseDouble(balObj.getNetPrice()));
-			//รับ เป็น รับ  = ( เดิม - ใหม่ ) * -1
-			if(Integer.parseInt(balObj.getTypeUsing()) ==0) 				editNetPrice = editNetPrice*-1;				
-			calculateAccBalanceForSameTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice());
+			 // จ่าย เป็น จ่าย (แค่เปลี่ยนตัวเลข) หรือ รับ เป็น รับ (แค่เปลี่ยนตัวเลข)
+			if((Integer.parseInt(balDetail.getTypeUsing()) == 0 && Integer.parseInt(balObj.getTypeUsing()) == 0) ||
+			  (Integer.parseInt(balDetail.getTypeUsing()) > 0 && Integer.parseInt(balObj.getTypeUsing()) > 0)	)
+			{
+				double editNetPrice = (Double.parseDouble(balDetail.getNetPrice()) - Double.parseDouble(balObj.getNetPrice()));
+				//รับ เป็น รับ  = ( เดิม - ใหม่ ) * -1
+				if(Integer.parseInt(balObj.getTypeUsing()) ==0) 				editNetPrice = editNetPrice*-1;				
+				calculateAccBalanceForSameTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice());
+			}
+			else // จ่าย เป็น รับ หรือ รับ เป็น จ่าย 
+			{
+				double editNetPrice = Double.parseDouble(balDetail.getNetPrice()) + Double.parseDouble(balObj.getNetPrice());
+				//รับ เป็น จ่าย = (เดิม + ของใหม่)*-1
+				if(Integer.parseInt(balDetail.getTypeUsing()) ==0 )				editNetPrice = editNetPrice*-1;
+				calculateAccBalanceForDifferentTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice(),balDetail.getNetPrice());				
+			}
 		}
-		else // จ่าย เป็น รับ หรือ รับ เป็น จ่าย 
+		else // แก้ไขแบบเปลี่ยนบัญชี
 		{
-			double editNetPrice = Double.parseDouble(balDetail.getNetPrice()) + Double.parseDouble(balObj.getNetPrice());
-			//รับ เป็น จ่าย = (เดิม + ของใหม่)*-1
-			if(Integer.parseInt(balDetail.getTypeUsing()) ==0 )				editNetPrice = editNetPrice*-1;
-			calculateAccBalanceForDifferentTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice(),balDetail.getNetPrice());
-				
+			calculateAccBalanceForDifferentPathUsingEdit(balDetail,balObj);
 			
 		}
-		
 		int update = db.update(activityTable, cv, colActivityId + "=" + balObj.getActivityId(), null);
 	}
 	

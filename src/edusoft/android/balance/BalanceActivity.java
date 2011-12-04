@@ -53,6 +53,7 @@ public class BalanceActivity extends Activity {
 	private TextView txtDate;
 	private TextView txtTime;
 	private Button addBalance;
+	private Button viewByDate;
 	private Spinner payTypeSpinner;
 	private Spinner payUsingWaySpinner;
 	private Button buttonCalendar;
@@ -90,6 +91,7 @@ public class BalanceActivity extends Activity {
 	private static String date = "";
 	static final int DATE_DIALOG_ID = 0;
 	static final int TIME_DIALOG_ID = 1;
+	static final int DATE_DIALOG_DATA_ID = 2;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -117,8 +119,16 @@ public class BalanceActivity extends Activity {
 
 			lv1.setAdapter(listLayout);
 			lv1.setOnItemClickListener(balanceEdit);
+			
+			viewByDate = (Button) findViewById(R.id.balance_main_calendarView);
+			viewByDate.setOnClickListener(dateDataPicker);
+			
 			addBalance = (Button) findViewById(R.id.balance_main_add);
 			addBalance.setOnClickListener(buttonAddBalance);
+			
+			mDay = Integer.parseInt(new Utility().getCurrentDay());
+			mMonth = Integer.parseInt(new Utility().getCurrentMonth());
+			mYear = Integer.parseInt(new Utility().getCurrentYear());
 		} catch (Exception e) {
 			AlertDialog.Builder b = new AlertDialog.Builder(this);
 			b.setMessage(e.toString());
@@ -126,6 +136,7 @@ public class BalanceActivity extends Activity {
 		}
 	}
 	//======================================= Listenner ================================================
+	
 	
 	//การทำงานเมื่อกดปุ่ม +
 	private OnClickListener buttonAddBalance = new OnClickListener() {
@@ -289,19 +300,50 @@ public class BalanceActivity extends Activity {
 		switch (id) {
 		case DATE_DIALOG_ID:
 			return new DatePickerDialog(this, mDateSetListener, mYear, mMonth,mDay);
+		case DATE_DIALOG_DATA_ID:
+			return new DatePickerDialog(this, mDateDataSetListener, mYear, mMonth,mDay);
 		case TIME_DIALOG_ID:
 			return new TimePickerDialog(this, mTimeSetListener, mHour, mMinute,true);
 		}
 		return null;
 	}
 	//===================================การทำงานในส่วนของตั้งค่า วัน เดือน ปี =============================================
-	
+	//ถ้าคลิก รูปปฏิทินในหน้าหลักของ  รายรับ-รายจ่าย ก็ให้ขึ้นข้อมูลรายรับ-รายจ่ายของวันนั้น ๆ มาแสดง ซึ่งเรียก method onCreateDialog
+	private OnClickListener dateDataPicker = new OnClickListener() {
+		public void onClick(View view) {
+			try{	
+				Toast.makeText(getApplicationContext(),Integer.toString(mDay)+ "/"+ Integer.toString(mMonth+1)+"/"+ Integer.toString(mYear), Toast.LENGTH_LONG).show();
+				showDialog(DATE_DIALOG_DATA_ID);
+			} catch (Exception e) {
+				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
+				b.setMessage(e.toString());
+				b.show();
+			}		
+		}
+	};
 	//ถ้าคลิก รูปปฏิทิน ก็ให้ขึ้น ตั้งค่า วัน เดือน ปี ซึ่งเรียก method onCreateDialog
 	private OnClickListener datePicker = new OnClickListener() {
 		public void onClick(View view) {
 			showDialog(DATE_DIALOG_ID);
 		}
 	};
+	//กรณี เปลี่ยน วัน เดือน ปี ใน dialod date ค่าถ็จะถูก set ค่่าเพื่อไปแสดงต่อไป
+		private DatePickerDialog.OnDateSetListener mDateDataSetListener = new DatePickerDialog.OnDateSetListener() {
+			// onDateSet method
+			public void onDateSet(DatePicker view, int year, int monthOfYear,
+					int dayOfMonth) {
+				try {
+					mYear = year;
+					mMonth = monthOfYear;
+					mDay = dayOfMonth;
+					updateDataByDate();
+				} catch (Exception e) {
+					AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
+					b.setMessage(e.toString());
+					b.show();
+				}
+			}
+		};	
 	//กรณี เปลี่ยน วัน เดือน ปี ใน dialod date ค่าถ็จะถูก set ค่่าเพื่อไปแสดงต่อไป
 	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
 		// onDateSet method
@@ -319,6 +361,12 @@ public class BalanceActivity extends Activity {
 			}
 		}
 	};	
+	//อัพเดทรายรับ-รายจ่าย ให้เป็นตามรายการ วัน ที่ระบุ
+	public void updateDataByDate() {
+		listview_data.clear();							
+		listview_data = getAllActivity(dbHelp.getActivityListData(new Utility().getDateFormat(mDay, mMonth, mYear)));
+		listLayout.notifyDataSetChanged();
+	}
 	//อัพเดท วัน เดือน ปี ให้อยู่ในรูปแบบในการ แสดงออกทางหน้าจอ ให้เป็นปัจจุบัน
 	public void updateDate() {
 		this.txtDate.setText(new StringBuilder().append("วันที่ : ").append(mDay).append("/").append(mMonth + 1).append("/").append(mYear));

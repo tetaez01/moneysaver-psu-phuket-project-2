@@ -26,6 +26,11 @@ public class Utility extends Activity{
 		return isNotNull;
 	}
 	
+	public String getDateFormat(int date,int month,int year)
+	{
+		return Integer.toString(date)+ "/"+ Integer.toString(month+1)+"/"+ Integer.toString(year);
+	}
+	
 	public String getCurrentDate(){
 		final Calendar c = Calendar.getInstance();
 		return Integer.toString(c.get(Calendar.DATE))+ "/"+ Integer.toString(c.get(Calendar.MONTH)+1)+"/"+ Integer.toString(c.get(Calendar.YEAR));
@@ -38,7 +43,7 @@ public class Utility extends Activity{
 	
 	public String getCurrentMonth(){
 		final Calendar c = Calendar.getInstance();
-		return Integer.toString(c.get(Calendar.MONTH)+1);
+		return Integer.toString(c.get(Calendar.MONTH));
 	}
 	
 	public String getCurrentYear(){
