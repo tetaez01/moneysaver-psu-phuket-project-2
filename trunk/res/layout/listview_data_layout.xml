@@ -7,12 +7,12 @@
 		android:layout_height="wrap_content">
 		<LinearLayout android:layout_weight=".20"
 			android:layout_width="0dip" android:orientation="vertical"
-			android:layout_height="50dip">
+			android:layout_height="70dip">
 			<ImageView android:layout_width="35dip"
 				android:layout_height="35dip" android:id="@+id/listDataLayout_bankIcon" />
 			<TextView android:layout_width="35dip" android:typeface="serif"
-				android:layout_height="30dip" android:id="@+id/listDataLayout_percentText"
-				android:textSize="13dip" android:text="50%" android:textStyle="bold" />
+				android:layout_height="35dip" android:id="@+id/listDataLayout_percentText"
+				android:textSize="13dip" android:text="50%" android:textStyle="bold"  android:gravity="bottom"/>
 		</LinearLayout>
 		<LinearLayout android:layout_weight=".35"
 			android:layout_width="0dip" android:orientation="vertical"
@@ -21,12 +21,14 @@
 				android:layout_height="wrap_content" android:id="@+id/listDataLayout_bankName"
 				android:textSize="12dip" android:textStyle="bold" />
 			<TextView android:layout_width="110dip" android:typeface="serif"
+				android:layout_height="wrap_content" android:id="@+id/listDataLayout_accountId"
+				android:textSize="12dip" android:textStyle="bold" />	
+			<TextView android:layout_width="110dip" android:typeface="serif"
 				android:layout_height="wrap_content" android:id="@+id/listDataLayout_category"
 				android:textSize="12dip" android:textStyle="bold" />
 			<TextView android:layout_width="110dip" android:typeface="serif"
 				android:layout_height="wrap_content" android:id="@+id/listDataLayout_currentDate"
-				android:textSize="12dip" android:text="This is text1"
-				android:textStyle="bold" />
+				android:textSize="12dip" android:textStyle="bold"/>
 		</LinearLayout>
 		<LinearLayout android:layout_weight=".45"
 			android:layout_width="0dip" android:orientation="vertical"
@@ -37,11 +39,11 @@
 				<TextView android:layout_width="wrap_content"
 					android:typeface="serif" android:layout_height="wrap_content"
 					android:textSize="12dip" android:text = "คงเหลือ :"
-					android:textColor="#52B804" android:textStyle="bold" />
+					android:textColor="#00ffff" android:textStyle="bold" />
 				<TextView android:layout_width="fill_parent"
 					android:typeface="serif" android:layout_height="wrap_content"
-					android:id="@+id/listDataLayout_IncomeAmount" android:textSize="12dip"
-					android:textColor="#52B804" android:textStyle="bold" 
+					android:id="@+id/listDataLayout_balancemount" android:textSize="12dip"
+					android:textColor="#00ffff" android:textStyle="bold" 
 					android:gravity="right"/>
 			</LinearLayout>
 			<LinearLayout android:layout_weight=".50"
@@ -55,6 +57,19 @@
 					android:typeface="serif" android:layout_height="wrap_content"
 					android:id="@+id/listDataLayout_Limit" android:textSize="12dip"
 					android:textColor="#FBDB00" android:textStyle="bold" 
+					android:gravity="right"/>
+			</LinearLayout>
+			<LinearLayout android:layout_weight=".50"
+				android:layout_width="fill_parent" android:orientation="horizontal"
+				android:layout_height="wrap_content" android:layout_gravity="right">
+				<TextView android:layout_width="wrap_content"
+					android:typeface="serif" android:layout_height="wrap_content"
+					android:textSize="12dip" android:text = "รายรับ   :"
+					android:textStyle="bold" android:textColor="#52B804"/>
+				<TextView android:layout_width="fill_parent"
+					android:typeface="serif" android:layout_height="wrap_content"
+					android:id="@+id/listDataLayout_incomeAmount" android:textSize="12dip"
+					android:textColor="#52B804" android:textStyle="bold" 
 					android:gravity="right"/>
 			</LinearLayout>
 			<LinearLayout android:layout_weight=".50"
