@@ -58,44 +58,55 @@ public class AccountActivity extends Activity {
 	private static final String ACCOUNTNAMEKEY =  "accountname";
 	private static final String CATEGORYIDKEY = "category";
 	private static final String CURRENTBALANCEKEY = "current_balance";
-	private static final String INCOMEKEY = "income";
+	private static final String BALANCEKEY = "balance";
 	private static final String LIMITKEY = "limit";
+	private static final String INCOMEKEY = "income";
 	private static final String EXPENSEKEY = "expense";
 	private static final String CURRENTDATEKEY = "date";
 	private static final String PERCENTAGEKEY = "percentage";
 	private static String curDate = "";
+	private static String curMonth = new Utility().getCurrentMonth();
 	private static ArrayAdapter adapter;
-	private static int totalIncome = 0;
-	private static int totalExpense = 0;
-	private static int totalRemain = 0;
+	private static double totalIncome = 0;
+	private static double totalExpense = 0;
+	private static double totalRemain = 0;
+
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_main);
 		listview_data = new ArrayList<HashMap<String, Object>>();
 		lv1 = (ListView) findViewById(R.id.accountMain_accountlist);
-
+		totalIncome = 0;
+		totalExpense = 0;
+		totalRemain = 0;
 		try {
 
 			dbHelp = new DatabaseHelper(this);
 			accList = new ArrayList();
 
 			accList = dbHelp.getAccountListData();
+			Button addAccount = (Button) findViewById(R.id.accountMain_add);
+			addAccount.setOnClickListener(buttonAddAccount);
 			
-			totalRemain = totalIncome - totalExpense;
-			TextView txt_totalIncome = (TextView) findViewById(R.id.accountMain_totalIncome);
-			TextView txt_totalExpense = (TextView) findViewById(R.id.accountMain_totalExpense);
-			TextView txt_totalRemain = (TextView) findViewById(R.id.accountMain_totalRemain);
+			
 
-			txt_totalIncome.setText(Integer.toString(totalIncome));
-			txt_totalExpense.setText(Integer.toString(totalExpense));
-			txt_totalRemain.setText(Integer.toString(totalRemain));
+			
 			listLayout = new ListViewLayout(getAllAccount(accList), this);
 
 			lv1.setAdapter(listLayout);
 			lv1.setOnItemClickListener(accountEdit);
-			Button addAccount = (Button) findViewById(R.id.accountMain_add);
-			addAccount.setOnClickListener(buttonAddAccount);
+			
+			
+
+			TextView txt_totalIncome = (TextView) findViewById(R.id.accountMain_totalIncome);
+			TextView txt_totalExpense = (TextView) findViewById(R.id.accountMain_totalExpense);
+			TextView txt_totalRemain = (TextView) findViewById(R.id.accountMain_totalRemain);
+			
+			totalRemain = totalIncome - totalExpense;
+			txt_totalIncome.setText(Double.toString(totalIncome));
+			txt_totalExpense.setText(Double.toString(totalExpense));
+			txt_totalRemain.setText(Double.toString(totalRemain));
 		} catch (Exception e) {
 			AlertDialog.Builder b = new AlertDialog.Builder(this);
 			b.setMessage(e.toString());
@@ -181,16 +192,21 @@ public class AccountActivity extends Activity {
 			hm.put(ACCOUNTNAMEKEY, accObj.getAccountName());
 			hm.put(IMGKEY, getResources().getIdentifier(dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym(), "drawable",getPackageName()));
 			hm.put(CATEGORYIDKEY, accObj.getAccountTypeId());//dbHelp.getAccTypeByAccountTypeId(accObj.getAccountTypeId()).getAccountType());
-			hm.put(CURRENTBALANCEKEY,accObj.getCurrentBalance());
+			hm.put(CURRENTBALANCEKEY,new Utility().addDecimal(accObj.getCurrentBalance()));
 			hm.put(CURRENTDATEKEY, new Utility().getCurrentDate());
-			hm.put(INCOMEKEY, new Utility().addDecimal(accObj.getCurrentBalance()));
+			//hm.put(INCOMEKEY, new Utility().addDecimal(accObj.getCurrentBalance()));
 			hm.put(LIMITKEY, new Utility().addDecimal(accObj.getLimitUsage()));
 			
+			
+			//ดึงรายการรับทั้งหมดของ บัญชีนั้น ๆ มา
+			String income = new Utility().addDecimal(dbHelp.getAmountIncomeInCurrentMonth(Integer.toString(Integer.parseInt(curMonth)+1),accObj.getAccountId()));
+			hm.put(INCOMEKEY, income);
+			totalIncome+= Double.parseDouble(income);
+			
 			//ดึงรายการจ่ายทั้งหมดของ บัญชีนั้น ๆ มา
-			String expense = new Utility().addDecimal(dbHelp.getAmountExpenseInCurrentMonth(new Utility().getCurrentMonth(),accObj.getAccountId()));
-			
+			String expense = new Utility().addDecimal(dbHelp.getAmountExpenseInCurrentMonth(Integer.toString(Integer.parseInt(curMonth)+1),accObj.getAccountId()));
 			hm.put(EXPENSEKEY, expense);
-			
+			totalExpense += Double.parseDouble(expense);
 			
 			//วงเงินจำกัดของบัญชีนั้น ๆ 
 			String limitUsage = new Utility().addDecimal(accObj.getLimitUsage());
@@ -270,7 +286,6 @@ public class AccountActivity extends Activity {
 						hm.put(CATEGORYIDKEY, accObj.getAccountTypeId());//dbHelp.getAccTypeByAccountTypeId(accObj.getAccountTypeId()).getAccountType());
 						hm.put(CURRENTBALANCEKEY,accObj.getCurrentBalance());
 						hm.put(CURRENTDATEKEY, new Utility().getCurrentDate());
-						hm.put(INCOMEKEY, new Utility().addDecimal(accObj.getCurrentBalance()));
 						hm.put(LIMITKEY, new Utility().addDecimal(accObj.getLimitUsage()));
 						hm.put(EXPENSEKEY, new Utility().addDecimal("0.00"));
 						if (calculatePercentage("0.00", "0.00") == 100)
@@ -360,10 +375,12 @@ public class AccountActivity extends Activity {
 					holder.icon = (ImageView) convertView.findViewById(R.id.listDataLayout_bankIcon);
 					holder.percentText = (TextView) convertView.findViewById(R.id.listDataLayout_percentText);
 					holder.bankName = (TextView) convertView.findViewById(R.id.listDataLayout_bankName);
+					holder.accountId = (TextView) convertView.findViewById(R.id.listDataLayout_accountId);
 					holder.category = (TextView) convertView.findViewById(R.id.listDataLayout_category);
 					holder.currentDate = (TextView) convertView.findViewById(R.id.listDataLayout_currentDate);
+					holder.incomeAmount = (TextView) convertView.findViewById(R.id.listDataLayout_incomeAmount);
 					holder.expenseAmount = (TextView) convertView.findViewById(R.id.listDataLayout_expenseAmount);
-					holder.IncomeAmount = (TextView) convertView.findViewById(R.id.listDataLayout_IncomeAmount);
+					holder.currentBalanceAmount = (TextView) convertView.findViewById(R.id.listDataLayout_balancemount);
 					holder.limit = (TextView) convertView.findViewById(R.id.listDataLayout_Limit);
 					holder.edit = (Button) convertView.findViewById(R.id.listDataLayout_ButtonEdit);
 					holder.delete = (Button) convertView.findViewById(R.id.listDataLayout_ButtonDelete);					
@@ -376,10 +393,14 @@ public class AccountActivity extends Activity {
 				holder.icon.setImageResource((Integer) listview_data.get(position).get(IMGKEY));
 				holder.percentText.setText(Integer.toString((Integer) listview_data.get(position).get(PERCENTAGEKEY))+ "%");
 				holder.bankName.setText(dbHelp.getBankObjectByBankId(((String) listview_data.get(position).get(BANKIDKEY))).getBankAcronym());
+				String accountNumber = (String) listview_data.get(position).get(ACCOUNTNUMBERKEY);
+				holder.accountId.setText(accountNumber);
 				holder.category.setText(dbHelp.getAccTypeByAccountTypeId(((String) listview_data.get(position).get(CATEGORYIDKEY))).getAccountType());
 				holder.currentDate.setText((String) listview_data.get(position).get(CURRENTDATEKEY));
+				holder.incomeAmount.setText((String) listview_data.get(position).get(INCOMEKEY));
 				holder.expenseAmount.setText((String) listview_data.get(position).get(EXPENSEKEY));
-				holder.IncomeAmount.setText((String) listview_data.get(position).get(INCOMEKEY));
+				holder.currentBalanceAmount.setText((String) listview_data.get(position).get(CURRENTBALANCEKEY));
+				
 				holder.limit.setText((String) listview_data.get(position).get(LIMITKEY));
 				holder.percentage.setProgress(((Integer) listview_data.get(position).get(PERCENTAGEKEY)));
 				//ปุ่ม ดินสอ เพื่อใช้ในการแก้ไขบัญชี
@@ -499,10 +520,12 @@ public class AccountActivity extends Activity {
 			ImageView icon;
 			TextView percentText;
 			TextView bankName;
+			TextView accountId;
 			TextView category;
 			TextView currentDate;
+			TextView incomeAmount;
 			TextView expenseAmount;
-			TextView IncomeAmount;
+			TextView currentBalanceAmount;			
 			TextView limit;
 			Button edit;
 			Button delete;
