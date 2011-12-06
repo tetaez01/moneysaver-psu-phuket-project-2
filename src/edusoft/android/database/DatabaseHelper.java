@@ -675,13 +675,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			
 		}
 		int update = db.update(activityTable, cv, colActivityId + "=" + balObj.getActivityId(), null);
-	}
-	
+	}	
+	//ดึงรายจ่ายของเดือนปัจจุบันมาใส่ใน แถบสี หน้า account
+	public String getAmountIncomeInCurrentMonth(String month,String accountId){
+		String incomeAmount = ""; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" = '0' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			incomeAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
+		}
+		cur.close();
+		return incomeAmount;	
+	}		
 	//ดึงรายจ่ายของเดือนปัจจุบันมาใส่ใน แถบสี หน้า account
 	public String getAmountExpenseInCurrentMonth(String month,String accountId){
 		String expenseAmount = ""; 
 		SQLiteDatabase db = this.getWritableDatabase();
 		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			expenseAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
+		}
+		cur.close();
+		return expenseAmount;	
+	}
+	//ดึงรายรับของวันที่กำหนดมาแสดงในหน้า activity
+	public String getIncomeAmountByDate(String date)
+	{
+		String incomeAmount = "0.00"; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" = '0' AND "+colActivityDate+" ='"+date+"'", null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			incomeAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
+		}
+		cur.close();
+		return incomeAmount;	
+	}
+	//ดึงรายจ่ายของเดือนปัจจุบันมาใส่ใน แถบสี หน้า account
+	public String getExpenseAmountByDate(String date){
+		String expenseAmount = "0.00"; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colActivityDate+"='"+date+"'", null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
 			expenseAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
@@ -730,6 +766,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 		return balObj;
 	}
+
 	//=============================== REUSE ===============================================
 
 	
