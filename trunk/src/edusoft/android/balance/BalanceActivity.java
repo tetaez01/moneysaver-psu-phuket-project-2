@@ -79,9 +79,6 @@ public class BalanceActivity extends Activity {
 	private static String curDate = "";
 	private static ArrayAdapter adapterPayType;
 	private static ArrayAdapter adapterPayUsing;
-	private static int totalIncome = 0;
-	private static int totalExpense = 0;
-	private static int totalRemain = 0;
 	private final Calendar c = Calendar.getInstance();
 	private int mYear;
 	private int mMonth;
@@ -109,12 +106,11 @@ public class BalanceActivity extends Activity {
 			activityList = dbHelp.getActivityListData(curDate);
 			
 			
-			totalRemain = totalIncome - totalExpense;
 			txt_totalIncome = (TextView) findViewById(R.id.balance_main_totalIncome);
 			txt_totalExpense = (TextView) findViewById(R.id.balance_main_totalExpense);
 
-			txt_totalIncome.setText(Integer.toString(totalIncome));
-			txt_totalExpense.setText(Integer.toString(totalExpense));
+			txt_totalIncome.setText(dbHelp.getIncomeAmountByDate(curDate));
+			txt_totalExpense.setText(dbHelp.getExpenseAmountByDate(curDate));
 			listLayout = new ListViewLayout(getAllActivity(activityList),this);
 
 			lv1.setAdapter(listLayout);
@@ -249,9 +245,7 @@ public class BalanceActivity extends Activity {
 						bal.setNetPrice(editTextAmount.getText().toString());						
 
 						if(canEdit){				
-							//Toast.makeText(getApplicationContext(),getAccountIdWithIndex(payUsingWaySpinner.getSelectedItemPosition())+","+bal.getTypeUsing()+","+bal.getActivityId(), Toast.LENGTH_SHORT).show();
 							dbHelp.editActivity(bal);	
-							//Toast.makeText(getApplicationContext(),output, Toast.LENGTH_LONG).show();
 						}else{
 							updateTabData = dbHelp.addActivity(bal);
 
@@ -259,6 +253,7 @@ public class BalanceActivity extends Activity {
 						//ทำการดึงข้อมูลมาใหม่เพื่อให้ ข้อมูลถูกเรียงตามวัน-เวลาที่ทำกิจกรรม
 						listview_data.clear();							
 						listview_data = getAllActivity(dbHelp.getActivityListData(curDate));
+						
 						listLayout.notifyDataSetChanged();
 						//if(updateTabData) 				switchTabSpecial(1);
 							
@@ -311,8 +306,7 @@ public class BalanceActivity extends Activity {
 	//ถ้าคลิก รูปปฏิทินในหน้าหลักของ  รายรับ-รายจ่าย ก็ให้ขึ้นข้อมูลรายรับ-รายจ่ายของวันนั้น ๆ มาแสดง ซึ่งเรียก method onCreateDialog
 	private OnClickListener dateDataPicker = new OnClickListener() {
 		public void onClick(View view) {
-			try{	
-				Toast.makeText(getApplicationContext(),Integer.toString(mDay)+ "/"+ Integer.toString(mMonth+1)+"/"+ Integer.toString(mYear), Toast.LENGTH_LONG).show();
+			try{					
 				showDialog(DATE_DIALOG_DATA_ID);
 			} catch (Exception e) {
 				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
@@ -364,7 +358,10 @@ public class BalanceActivity extends Activity {
 	//อัพเดทรายรับ-รายจ่าย ให้เป็นตามรายการ วัน ที่ระบุ
 	public void updateDataByDate() {
 		listview_data.clear();							
-		listview_data = getAllActivity(dbHelp.getActivityListData(new Utility().getDateFormat(mDay, mMonth, mYear)));
+		curDate = Integer.toString(mDay)+ "/"+ Integer.toString(mMonth+1)+"/"+ Integer.toString(mYear);
+		listview_data = getAllActivity(dbHelp.getActivityListData(new Utility().getDateFormat(mDay, mMonth, mYear)));		
+		txt_totalIncome.setText(dbHelp.getIncomeAmountByDate(curDate));
+		txt_totalExpense.setText(dbHelp.getExpenseAmountByDate(curDate));
 		listLayout.notifyDataSetChanged();
 	}
 	//อัพเดท วัน เดือน ปี ให้อยู่ในรูปแบบในการ แสดงออกทางหน้าจอ ให้เป็นปัจจุบัน
@@ -493,7 +490,7 @@ public class BalanceActivity extends Activity {
 				else if(typeUsing.equals(FixTypeUsing.fixWithdraw) || typeUsing.equals(FixTypeUsing.fixTransfer))
 					holder.typeUsingIMG.setImageResource(R.drawable.transfer_withdraw);				
 				holder.description.setText((String) listview_data.get(position).get(DESCRIPTIONKEY));
-				holder.time.setText((String) listview_data.get(position).get(TIMEKEY));
+				holder.time.setText((String) listview_data.get(position).get(TIMEKEY)+" น.");
 				holder.date.setText((String) listview_data.get(position).get(DATEKEY));
 				holder.amount.setText((String) listview_data.get(position).get(AMOUNTKEY));
 				//ใส่สีให้ราคาสุทธิ ว่าจ่าย หรือ รับเข้า (แดง,เขียว)
