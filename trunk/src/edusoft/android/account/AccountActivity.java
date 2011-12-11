@@ -95,7 +95,7 @@ public class AccountActivity extends Activity {
 			listLayout = new ListViewLayout(getAllAccount(accList), this);
 
 			lv1.setAdapter(listLayout);
-			lv1.setOnItemClickListener(accountEdit);
+			lv1.setOnItemClickListener(accountShowData);
 			
 			
 
@@ -122,10 +122,9 @@ public class AccountActivity extends Activity {
 		}
 	};
 	//การทำงานเมื่อคลิกข้อมูลแต่ละแถว
-	private AdapterView.OnItemClickListener accountEdit = new OnItemClickListener() {
+	private AdapterView.OnItemClickListener accountShowData = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
 			try {
-				Toast.makeText(getApplicationContext(),"sdfsdf", Toast.LENGTH_LONG).show();
 				accObj = new AccountObject();
 				accObj.setBankId((String) listview_data.get(position).get(BANKIDKEY));
 				accObj.setAccountId((String) listview_data.get(position).get(ACCOUNTIDKEY));
@@ -441,7 +440,7 @@ public class AccountActivity extends Activity {
 								SubmitButton.setOnClickListener(new OnClickListener() {
 									@Override
 									public void onClick(View v) {
-										try {
+										try {											
 											dbHelp.editLimitedUsageForCash(Integer.parseInt((String) hm.get(ACCOUNTIDKEY)),Double.parseDouble(limitEdit.getText().toString()));					
 											hm.put(LIMITKEY, new Utility().addDecimal(limitEdit.getText().toString()));
 											listview_data.set(index, hm);
