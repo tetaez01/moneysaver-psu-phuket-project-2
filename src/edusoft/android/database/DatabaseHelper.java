@@ -319,6 +319,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		cv.put(colAccountCurrentBalance, Double.parseDouble(accObj.getCurrentBalance()));		
 		db.update(accountTable, cv, colAccountId + "=" + accObj.getAccountId(), null);
 	}
+	//ดึงยอดเงินคงเหลือของบัญชีที่ต้องการ
+	public double getCurrentBalanceWithAccountId(String accountId){
+		double currentBalance = 0;
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"="+accountId, null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			currentBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance));
+		}
+		return currentBalance;
+	}
 	//ดึงข้อมูล account ทั้งหมดมาแสดงในหน้าแรกของ tab account
 	public List getAccountListData(){
 		listAccount = new ArrayList();
@@ -408,61 +419,62 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			cur.moveToFirst();
 			curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance))+Double.parseDouble(amount);
 		}		
-		
-		cv = new ContentValues();
-		cv.put(colAccountCurrentBalance, curBalance);
-		int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
-		
-		int oldTypeUsing = 0;
-		cur = db.rawQuery("SELECT fix_account_type_using_id FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
-		if(cur.getCount() == 1){
-			cur.moveToFirst();
-			oldTypeUsing = cur.getInt(cur.getColumnIndex(colAccountTypeUsingId));
-		}
-
-		//ตรวจสอบว่าเป็นการถอนเงินใหมถ้าถอนก็ให้เอาไปบวกใน Cash ใช้ในการอัพเดทคงเหลือของ Cash 
-		if(typeUsing.equals("2") && oldTypeUsing != 2){ //โอน เป็น ถอน
-			cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+		if(curBalance >= 0){
+			cv = new ContentValues();
+			cv.put(colAccountCurrentBalance, curBalance);
+			int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
+			
+			int oldTypeUsing = 0;
+			cur = db.rawQuery("SELECT fix_account_type_using_id FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
 			if(cur.getCount() == 1){
 				cur.moveToFirst();
-				limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
-				curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit));	
-				cv = new ContentValues();
-				cv.put(colAccountLimitUsage, limit_usage);
-				cv.put(colAccountCurrentBalance, curBalance);
+				oldTypeUsing = cur.getInt(cur.getColumnIndex(colAccountTypeUsingId));
 			}
-			rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
-		}else if(oldTypeUsing == 2 && !typeUsing.equals("2")){ //กรณีถอน เป็น โอน  จะต้องเอาค่าเดิมที่เปลี่ยนไปลบ Cash ด้วย
-			cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
-			if(cur.getCount() == 1){
-				cur.moveToFirst();
-				limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit)*-1);
-				curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit)*-1);
-				if(limit_usage < 0 && curBalance < 0 ) 
-				{
-					limit_usage = 0;
-					curBalance = 0;
+	
+			//ตรวจสอบว่าเป็นการถอนเงินใหมถ้าถอนก็ให้เอาไปบวกใน Cash ใช้ในการอัพเดทคงเหลือของ Cash 
+			if(typeUsing.equals("2") && oldTypeUsing != 2){ //โอน เป็น ถอน
+				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+				if(cur.getCount() == 1){
+					cur.moveToFirst();
+					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
+					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit));	
+					cv = new ContentValues();
+					cv.put(colAccountLimitUsage, limit_usage);
+					cv.put(colAccountCurrentBalance, curBalance);
 				}
-				cv = new ContentValues();
-				cv.put(colAccountLimitUsage, limit_usage);
-				cv.put(colAccountCurrentBalance, curBalance);
-			}
-			rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);
-		}else if(typeUsing.equals("2") && oldTypeUsing == 2){ //กรณี ถอน เป็น ถอน แค่เปลี่ยนตัวเลข ก็จะเอาผลต่าง มาบวกกับค่าเดิม เช่น เดิม 500 เปลี่ยน เป็น 600 ก็จะเอา 100 มาบวกเพิ่ม
-			cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
-			if(cur.getCount() == 1){
-				cur.moveToFirst();
-				limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amount)*-1);
-				curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amount)*-1);	
-				cv = new ContentValues();
-				cv.put(colAccountLimitUsage, limit_usage);
-				cv.put(colAccountCurrentBalance, curBalance);
-			}
-			rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
+				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
+			}else if(oldTypeUsing == 2 && !typeUsing.equals("2")){ //กรณีถอน เป็น โอน  จะต้องเอาค่าเดิมที่เปลี่ยนไปลบ Cash ด้วย
+				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+				if(cur.getCount() == 1){
+					cur.moveToFirst();
+					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit)*-1);
+					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit)*-1);
+					if(limit_usage < 0 && curBalance < 0 ) 
+					{
+						limit_usage = 0;
+						curBalance = 0;
+					}
+					cv = new ContentValues();
+					cv.put(colAccountLimitUsage, limit_usage);
+					cv.put(colAccountCurrentBalance, curBalance);
+				}
+				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);
+			}else if(typeUsing.equals("2") && oldTypeUsing == 2){ //กรณี ถอน เป็น ถอน แค่เปลี่ยนตัวเลข ก็จะเอาผลต่าง มาบวกกับค่าเดิม เช่น เดิม 500 เปลี่ยน เป็น 600 ก็จะเอา 100 มาบวกเพิ่ม
+				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+				if(cur.getCount() == 1){
+					cur.moveToFirst();
+					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amount)*-1);
+					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amount)*-1);	
+					cv = new ContentValues();
+					cv.put(colAccountLimitUsage, limit_usage);
+					cv.put(colAccountCurrentBalance, curBalance);
+				}
+				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
+			}else
+			
+			if(rowEffected > 0)
+				returnValue = true;
 		}
-		
-		if(rowEffected > 0)
-			returnValue = true;
 		return returnValue;
 		
 	}
@@ -480,53 +492,54 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			cur.moveToFirst();
 			curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance))+Double.parseDouble(amount);
 		}
-					
-		cv = new ContentValues();
-		cv.put(colAccountCurrentBalance, curBalance);
-		int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
-		
-		int oldTypeUsing = 0;
-		cur = db.rawQuery("SELECT fix_account_type_using_id FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
-		if(cur.getCount() == 1){
-			cur.moveToFirst();
-			oldTypeUsing = cur.getInt(cur.getColumnIndex(colAccountTypeUsingId));
-		}
-
-		//ตรวจสอบว่าเป็นการถอนเงินใหมถ้าถอนก็ให้เอาไปบวกใน Cash ใช้ในการอัพเดทคงเหลือของ Cash 
-		if(typeUsing.equals("2") && oldTypeUsing != 2){ //รายรับ เป็น ต่าย โดยอยู่ในสภานะ รับ --> ถอน
-			cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
-			if(cur.getCount() == 1)
-			{
-				cur.moveToFirst();
-				limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
-				curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit));	
-				cv = new ContentValues();
-				cv.put(colAccountLimitUsage, limit_usage);
-				cv.put(colAccountCurrentBalance, curBalance);
-			}
+		if(curBalance >= 0){			
+			cv = new ContentValues();
+			cv.put(colAccountCurrentBalance, curBalance);
+			int rowEffected = db.update(accountTable, cv, colAccountId + "=" + accId, null);
 			
-			rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
-		}
-		else if(oldTypeUsing == 2)//รายจ่าย เป็นรับ โดยอยู่ในสถานะ ถอน --> รับ
-		{
-			cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
-			if(cur.getCount() == 1)
-			{
+			int oldTypeUsing = 0;
+			cur = db.rawQuery("SELECT fix_account_type_using_id FROM " + activityTable +" WHERE "+colActivityId+"="+activityId, null);
+			if(cur.getCount() == 1){
 				cur.moveToFirst();
-				limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))- (Double.parseDouble(amountBeforEdit));
-				curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) - (Double.parseDouble(amountBeforEdit));	
-				cv = new ContentValues();
-				cv.put(colAccountLimitUsage, limit_usage);
-				cv.put(colAccountCurrentBalance, curBalance);
+				oldTypeUsing = cur.getInt(cur.getColumnIndex(colAccountTypeUsingId));
 			}
+	
+			//ตรวจสอบว่าเป็นการถอนเงินใหมถ้าถอนก็ให้เอาไปบวกใน Cash ใช้ในการอัพเดทคงเหลือของ Cash 
+			if(typeUsing.equals("2") && oldTypeUsing != 2){ //รายรับ เป็น ต่าย โดยอยู่ในสภานะ รับ --> ถอน
+				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+				if(cur.getCount() == 1)
+				{
+					cur.moveToFirst();
+					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
+					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit));	
+					cv = new ContentValues();
+					cv.put(colAccountLimitUsage, limit_usage);
+					cv.put(colAccountCurrentBalance, curBalance);
+				}
+				
+				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
+			}
+			else if(oldTypeUsing == 2)//รายจ่าย เป็นรับ โดยอยู่ในสถานะ ถอน --> รับ
+			{
+				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+				if(cur.getCount() == 1)
+				{
+					cur.moveToFirst();
+					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))- (Double.parseDouble(amountBeforEdit));
+					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) - (Double.parseDouble(amountBeforEdit));	
+					cv = new ContentValues();
+					cv.put(colAccountLimitUsage, limit_usage);
+					cv.put(colAccountCurrentBalance, curBalance);
+				}
+				
+				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);	
+			}
+			//*/
 			
-			rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);	
+			
+			if(rowEffected > 0)
+				returnValue = true;
 		}
-		//*/
-		
-		
-		if(rowEffected > 0)
-			returnValue = true;
 		
 		return returnValue;
 		
@@ -556,18 +569,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			curBalance += Double.parseDouble(oldBalObj.getNetPrice());
 			limitUsage += Double.parseDouble(oldBalObj.getNetPrice());
 		}
-		cv = new ContentValues();
-		cv.put(colAccountLimitUsage, limitUsage);
-		cv.put(colAccountCurrentBalance, curBalance);
-		//ถอน เป็น ถอน แต่เปลี่ยนบัญชี
-		if(oldBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw) && newBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw))
-			amount = Double.parseDouble(oldBalObj.getNetPrice())- Double.parseDouble(newBalObj.getNetPrice());
-		else if(!newBalObj.getTypeUsing().equals("0")) 				
-			amount = amount*-1;
-		rowEffected = db.update(accountTable, cv, colAccountId + "="+oldBalObj.getAccountId(), null);	
-		calculateAccBalanceForAdd(newBalObj.getAccountId(),newBalObj.getTypeUsing(),Double.toString(amount));
-		if(rowEffected > 0)
-			returnValue = true;
+		if(curBalance >= 0){
+			cv = new ContentValues();
+			cv.put(colAccountLimitUsage, limitUsage);
+			cv.put(colAccountCurrentBalance, curBalance);
+			//ถอน เป็น ถอน แต่เปลี่ยนบัญชี
+			if(oldBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw) && newBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw))
+				amount = Double.parseDouble(oldBalObj.getNetPrice())- Double.parseDouble(newBalObj.getNetPrice());
+			else if(!newBalObj.getTypeUsing().equals("0")) 				
+				amount = amount*-1;
+			rowEffected = db.update(accountTable, cv, colAccountId + "="+oldBalObj.getAccountId(), null);	
+			calculateAccBalanceForAdd(newBalObj.getAccountId(),newBalObj.getTypeUsing(),Double.toString(amount));
+			if(rowEffected > 0)
+				returnValue = true;
+		}
 		return returnValue;
 	}
 	//คำนวน balance ในบัญชีว่าเป็นรายรับ หรือ รายจ่าย(รวมถึง โอนเงิน,ถอนเงิน) โดย isPaid คือ รายรับ = false, รายจ่าย = true เพื่อใช้ในส่วนของการลบกิจกรรม
@@ -622,14 +637,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	//เพิ่มกิจกรรม ทีละรายการ (กดปุ่ม +)
 	public boolean addActivity(BalanceObject balObj){
 		boolean returnValue=false;
-		String activityId ="";
 		SQLiteDatabase db = this.getWritableDatabase();
-		db.execSQL("INSERT INTO activity(account_id,fix_account_type_using_id,description,date,time,net_price) VALUES(" 
-				+ balObj.getAccountId()+","+balObj.getTypeUsing()+",'"+balObj.getDescription()+"','"+balObj.getDate()+"','"+balObj.getTime()+"',"+balObj.getNetPrice()+")");		
-		double addNetPrice = Double.parseDouble(balObj.getNetPrice());
-		//ตรวจสอบว่าเป็นรายรับหรือรายจ่าย
-		if(!balObj.getTypeUsing().equals("0")) 				addNetPrice = addNetPrice*-1;				
-		return calculateAccBalanceForAdd(balObj.getAccountId(),balObj.getTypeUsing(),Double.toString(addNetPrice)) ;
+		//ตรวจสอบว่า ยอดเงินที่ใส่เข้าไปมากกว่ายอดเงินคงเหลือหรือไม่ โดยใช้ในกรณี รายจ่ายเท่านั้น
+		if((!balObj.getTypeUsing().equals(FixTypeUsing.fixIncome) 
+				&& (getCurrentBalanceWithAccountId(balObj.getAccountId()) >= Double.parseDouble(balObj.getNetPrice())))
+				|| balObj.getTypeUsing().equals(FixTypeUsing.fixIncome))
+		{
+			db.execSQL("INSERT INTO activity(account_id,fix_account_type_using_id,description,date,time,net_price) VALUES(" 
+					+ balObj.getAccountId()+","+balObj.getTypeUsing()+",'"+balObj.getDescription()+"','"+balObj.getDate()+"','"+balObj.getTime()+"',"+balObj.getNetPrice()+")");		
+			double addNetPrice = Double.parseDouble(balObj.getNetPrice());
+			//ตรวจสอบว่าเป็นรายรับหรือรายจ่าย
+			if(!balObj.getTypeUsing().equals("0")) 				addNetPrice = addNetPrice*-1;
+			returnValue = calculateAccBalanceForAdd(balObj.getAccountId(),balObj.getTypeUsing(),Double.toString(addNetPrice)) ;
+		}
+		return returnValue;
 	}	
 	//ลบกิจกรรม ที่ละรายการ (กดปุ่ม x)
 	public void deleteActivity(String activityId,String accountId,String typeUsing,String amount){
@@ -638,9 +659,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		calculateAccBalanceForDelete(accountId,typeUsing,amount);
 	}
 	//แก้รายละเอียดของกิจกรรม
-	public void editActivity(BalanceObject balObj) {
-		BalanceObject balDetail = getActivityDatailWithId(balObj.getActivityId());
-		
+	public boolean editActivity(BalanceObject balObj) {
+		boolean returnValue=false;
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues cv = new ContentValues();
 		cv.put(colAccountId, Integer.parseInt(balObj.getAccountId()));
@@ -649,32 +669,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		cv.put(colActivityDate, balObj.getDate());
 		cv.put(colActivityTime, balObj.getTime());
 		cv.put(colActivityNetPrice, Double.parseDouble(balObj.getNetPrice()));
-		//แก้ไขบัญชีเดียวกัน
-		if(balDetail.getAccountId().equals(balObj.getAccountId()))
+		//ข้อมูลก่อนการอัพเดท
+		BalanceObject balDetail = getActivityDatailWithId(balObj.getActivityId());
+		if((!balObj.getTypeUsing().equals(FixTypeUsing.fixIncome) 
+			&& (getCurrentBalanceWithAccountId(balObj.getAccountId()) >= Double.parseDouble(balObj.getNetPrice())))
+			|| balObj.getTypeUsing().equals(FixTypeUsing.fixIncome))
 		{
-			 // จ่าย เป็น จ่าย (แค่เปลี่ยนตัวเลข) หรือ รับ เป็น รับ (แค่เปลี่ยนตัวเลข)
-			if((Integer.parseInt(balDetail.getTypeUsing()) == 0 && Integer.parseInt(balObj.getTypeUsing()) == 0) ||
-			  (Integer.parseInt(balDetail.getTypeUsing()) > 0 && Integer.parseInt(balObj.getTypeUsing()) > 0)	)
+			//แก้ไขบัญชีเดียวกัน
+			if(balDetail.getAccountId().equals(balObj.getAccountId()))
 			{
-				double editNetPrice = (Double.parseDouble(balDetail.getNetPrice()) - Double.parseDouble(balObj.getNetPrice()));
-				//รับ เป็น รับ  = ( เดิม - ใหม่ ) * -1
-				if(Integer.parseInt(balObj.getTypeUsing()) ==0) 				editNetPrice = editNetPrice*-1;				
-				calculateAccBalanceForSameTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice());
+				 // จ่าย เป็น จ่าย (แค่เปลี่ยนตัวเลข) หรือ รับ เป็น รับ (แค่เปลี่ยนตัวเลข)
+				if((Integer.parseInt(balDetail.getTypeUsing()) == 0 && Integer.parseInt(balObj.getTypeUsing()) == 0) ||
+				  (Integer.parseInt(balDetail.getTypeUsing()) > 0 && Integer.parseInt(balObj.getTypeUsing()) > 0)	)
+				{
+					double editNetPrice = (Double.parseDouble(balDetail.getNetPrice()) - Double.parseDouble(balObj.getNetPrice()));
+					//รับ เป็น รับ  = ( เดิม - ใหม่ ) * -1
+					if(Integer.parseInt(balObj.getTypeUsing()) ==0) 				editNetPrice = editNetPrice*-1;				
+					returnValue =  calculateAccBalanceForSameTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice());
+				}
+				else // จ่าย เป็น รับ หรือ รับ เป็น จ่าย 
+				{
+					double editNetPrice = Double.parseDouble(balDetail.getNetPrice()) + Double.parseDouble(balObj.getNetPrice());
+					//รับ เป็น จ่าย = (เดิม + ของใหม่)*-1
+					if(Integer.parseInt(balDetail.getTypeUsing()) ==0 )				editNetPrice = editNetPrice*-1;
+					returnValue = calculateAccBalanceForDifferentTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice(),balDetail.getNetPrice());				
+				}
 			}
-			else // จ่าย เป็น รับ หรือ รับ เป็น จ่าย 
+			else // แก้ไขแบบเปลี่ยนบัญชี
 			{
-				double editNetPrice = Double.parseDouble(balDetail.getNetPrice()) + Double.parseDouble(balObj.getNetPrice());
-				//รับ เป็น จ่าย = (เดิม + ของใหม่)*-1
-				if(Integer.parseInt(balDetail.getTypeUsing()) ==0 )				editNetPrice = editNetPrice*-1;
-				calculateAccBalanceForDifferentTypeEdit(balObj.getAccountId(),balObj.getActivityId(),balObj.getTypeUsing(),Double.toString(editNetPrice),balObj.getNetPrice(),balDetail.getNetPrice());				
+				returnValue = calculateAccBalanceForDifferentPathUsingEdit(balDetail,balObj);
+				
 			}
+			if(returnValue) db.update(activityTable, cv, colActivityId + "=" + balObj.getActivityId(), null);
 		}
-		else // แก้ไขแบบเปลี่ยนบัญชี
-		{
-			calculateAccBalanceForDifferentPathUsingEdit(balDetail,balObj);
-			
-		}
-		int update = db.update(activityTable, cv, colActivityId + "=" + balObj.getActivityId(), null);
+
+		return returnValue;
 	}	
 	//ดึงรายจ่ายของเดือนปัจจุบันมาใส่ใน แถบสี หน้า account
 	public String getAmountIncomeInCurrentMonth(String month,String accountId){

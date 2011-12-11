@@ -245,19 +245,21 @@ public class BalanceActivity extends Activity {
 						bal.setNetPrice(editTextAmount.getText().toString());						
 
 						if(canEdit){				
-							dbHelp.editActivity(bal);	
+							updateTabData = dbHelp.editActivity(bal);	
 						}else{
-							updateTabData = dbHelp.addActivity(bal);
-
+							//Toast.makeText(getApplicationContext(),dbHelp.getCurrentBalanceWithAccountId(bal.getAccountId()) +","+ bal.getNetPrice(), Toast.LENGTH_LONG).show();
+							updateTabData = dbHelp.addActivity(bal);			
 						}
-						//ทำการดึงข้อมูลมาใหม่เพื่อให้ ข้อมูลถูกเรียงตามวัน-เวลาที่ทำกิจกรรม
-						listview_data.clear();							
-						listview_data = getAllActivity(dbHelp.getActivityListData(curDate));
 						
-						listLayout.notifyDataSetChanged();
-						//if(updateTabData) 				switchTabSpecial(1);
-							
-						dialog.dismiss();
+						if(updateTabData){
+							//ทำการดึงข้อมูลมาใหม่เพื่อให้ ข้อมูลถูกเรียงตามวัน-เวลาที่ทำกิจกรรม
+							listview_data.clear();							
+							listview_data = getAllActivity(dbHelp.getActivityListData(curDate));							
+							listLayout.notifyDataSetChanged();
+							dialog.dismiss();
+						}else{
+							Toast.makeText(getApplicationContext(),"วงเงินมากกว่าเงินคงเหลือ กรุณาใส่อีกครั้ง", Toast.LENGTH_LONG).show();
+						}											
 					}catch (Exception e) {
 						AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
 						b.setMessage(e.toString());
