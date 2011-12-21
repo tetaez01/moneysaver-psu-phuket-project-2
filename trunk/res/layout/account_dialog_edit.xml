@@ -17,7 +17,7 @@
 	<EditText android:id="@+id/account_dialog_edit_limit" android:layout_width="fill_parent"
 		android:layout_height="40dip"
 		android:layout_toRightOf="@+id/account_dialog_edit_limittext"
-		android:layout_below="@+id/account_dialog_edit_bankimg" />
+		android:layout_below="@+id/account_dialog_edit_bankimg" android:numeric="decimal"/>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:id="@+id/accountDialog_LinearLayout3" android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:layout_below="@+id/account_dialog_edit_limit"
