@@ -44,7 +44,7 @@
 		<TextView android:text="จำนวนสุทธิ" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" />
 		<EditText android:id="@+id/balance_dialog_add_editTextAmount"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			android:layout_width="fill_parent" android:layout_height="wrap_content" android:numeric="decimal"/>
 	</LinearLayout>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -53,6 +53,5 @@
 			android:layout_width="wrap_content" android:layout_height="wrap_content" />
 		<Button android:text="ยกเลิก" android:id="@+id/balance_dialog_add_buttonCancel"
 			android:layout_width="wrap_content" android:layout_height="wrap_content" />
-
 	</LinearLayout>
 </LinearLayout>
