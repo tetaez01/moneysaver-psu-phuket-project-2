@@ -17,14 +17,15 @@
 			android:layout_height="wrap_content">
 			<LinearLayout android:layout_width="fill_parent"
 				android:orientation="horizontal" android:layout_height="wrap_content">
+				<ImageView android:layout_width="20dip"
+					android:layout_height="20dip"
+					android:id="@+id/listview_data_list_layout_imgTypeUsinng" />
 				<TextView android:layout_weight="0.80"
 					android:layout_width="0dip" android:typeface="serif"
 					android:layout_height="wrap_content" android:id="@+id/listview_data_list_layout_description"
 					android:textSize="15dip" android:text="Breakfast at P'pink"
 					android:textStyle="bold" />
-				<ImageView android:layout_width="20dip"
-					android:layout_height="20dip"
-					android:id="@+id/listview_data_list_layout_imgTypeUsinng" />
+				
 				<Button android:id="@+id/listview_data_list_layout_ButtonEdit"
 					android:textColor="#FFFFFF" android:background="@drawable/edit_icon"
 					android:layout_height="15dip" android:layout_width="15dip" />	
