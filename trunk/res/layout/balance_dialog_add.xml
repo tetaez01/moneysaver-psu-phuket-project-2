@@ -6,17 +6,45 @@
 		android:layout_height="wrap_content" />
 	<EditText android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/balance_dialog_add_editTextDescription" />
-	<TextView android:text="ประเภทการใช้จ่าย"
-		android:layout_width="wrap_content" android:layout_height="wrap_content" />
-	<Spinner android:layout_width="fill_parent"
-		android:id="@+id/balance_dialog_add_spinnerUsingType"
-		android:prompt="@string/paytype"
-		android:layout_height="wrap_content"></Spinner>
+
+	<!-- //////////// -->
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:orientation="horizontal" android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_width="100dip" android:layout_height="wrap_content"
+			android:weightSum="1" android:gravity="left" android:orientation="vertical">
+			<TextView android:text="ถ่ายรูป  " android:layout_width="60dip"
+				android:layout_height="wrap_content" android:layout_weight="0.18" />
+
+			<Button android:id="@+id/balance_dialog_add_ButtonCamera"
+				android:layout_width="30dip" android:layout_height="30dip"
+				android:background="@drawable/camera_icon" />
+		</LinearLayout>
+		
+		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_height="wrap_content" android:orientation="vertical"
+			android:gravity="left" android:layout_width="150dip">
+
+			<TextView  android:text="ประเภทการใช้จ่าย "
+				android:layout_height="wrap_content" android:layout_width="150dip"/>
+
+
+			<Spinner android:layout_width="fill_parent"
+				android:id="@+id/balance_dialog_add_spinnerUsingType"
+				android:prompt="@string/paytype" android:layout_height="wrap_content"></Spinner>
+		</LinearLayout>
+	</LinearLayout>
+
+	<!-- <TextView android:text="ประเภทการใช้จ่าย" android:layout_width="wrap_content" 
+		android:layout_height="wrap_content" /> <Spinner android:layout_width="fill_parent" 
+		android:id="@+id/balance_dialog_add_spinnerUsingType" android:prompt="@string/paytype" 
+		android:layout_height="wrap_content"></Spinner> -->
 	<TextView android:text="ช่องทางการใช้จ่าย"
 		android:layout_width="fill_parent" android:layout_height="wrap_content" />
 	<Spinner android:layout_width="fill_parent"
-		android:id="@+id/balance_dialog_add_spinnerUsingWay" 
-		android:prompt="@string/payway"
+		android:id="@+id/balance_dialog_add_spinnerUsingWay" android:prompt="@string/payway"
 		android:layout_height="wrap_content"></Spinner>
 
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -25,18 +53,18 @@
 		<TextView android:text="วันที่:10/12/2011" android:id="@+id/balance_dialog_add_textViewDate"
 			android:layout_width="115dip" android:layout_height="wrap_content" />
 		<Button android:id="@+id/balance_dialog_add_ButtonCalendar"
-			android:layout_width="wrap_content" android:layout_height="wrap_content" 
-			android:background="@drawable/calendar_icon"/>
-			
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:background="@drawable/calendar_icon" />
+
 	</LinearLayout>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:orientation="horizontal">
 		<TextView android:text="เวลา 10.00" android:id="@+id/balance_dialog_add_textViewTime"
 			android:layout_width="115dip" android:layout_height="wrap_content" />
-		<Button  android:id="@+id/balance_dialog_add_ButtonTime"
-			android:layout_width="wrap_content" android:layout_height="wrap_content" 
-			android:background="@drawable/clock_icon"/>		
+		<Button android:id="@+id/balance_dialog_add_ButtonTime"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:background="@drawable/clock_icon" />
 	</LinearLayout>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -44,7 +72,8 @@
 		<TextView android:text="จำนวนสุทธิ" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" />
 		<EditText android:id="@+id/balance_dialog_add_editTextAmount"
-			android:layout_width="fill_parent" android:layout_height="wrap_content" android:numeric="decimal"/>
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:numeric="decimal" />
 	</LinearLayout>
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="wrap_content" android:layout_height="wrap_content"
