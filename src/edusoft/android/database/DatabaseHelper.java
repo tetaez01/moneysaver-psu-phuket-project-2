@@ -131,18 +131,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		
 		//ข้อมูลธนาคาร
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(0,'เงินสด','cash')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(1,'ธนาคารกรุงเทพ จำกัด(มหาชน)','bbl')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(2,'ธนาคารกสิกรไทย จำกัด(มหาชน)','kbank')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(3,'ธนาคารกรุงไทย จำกัด(มหาชน)','ktb')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(4,'ธนาคารกรุงศรีอยุธยา จำกัด(มหาชน)','bay')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(1,'ธนาคารกรุงเทพ','bbl')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(2,'ธนาคารกสิกรไทย','kbank')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(3,'ธนาคารกรุงไทย','ktb')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(4,'ธนาคารกรุงศรีอยุธยา','bay')");
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(5,'ธนาคารเกียรตินาคิน','kk')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(6,'ธนาคารซิตี้แบงค์ จำกัด','citi')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(6,'ธนาคารซิตี้แบงค์ ','citi')");
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(7,'ธนาคารซีไอเอ็มบี ไทย','cimb')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(8,'ธนาคารทหารไทย จำกัด(มหาชน)','tmb')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(9,'ธนาคารทิสโก้ จำกัด (มหาชน)','tisco')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(10,'ธนาคารไทยพาณิชย์ จำกัด(มหาชน)','scb')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(8,'ธนาคารทหารไทย','tmb')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(9,'ธนาคารทิสโก้','tisco')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(10,'ธนาคารไทยพาณิชย์','scb')");
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(11,'ธนาคารธนชาติ','tbank')");
-		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(12,'ธนาคารนครหลวงไทย จำกัด(มหาชน)' ,'scib')");
+		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(12,'ธนาคารนครหลวงไทย' ,'scib')");
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(13,'ธนาคารเมกะสากลพาณิชย์ ','megabank')");
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(14,'ธนาคารยูโอบี','uob')");
 		db.execSQL("insert into bank (bank_id,bank_name,bank_acronym) values(15,'ธนาคารสแตนดาร์ดชาร์เตอร์ดไทย','scbt')");

@@ -258,7 +258,7 @@ public class BalanceActivity extends Activity {
 							listLayout.notifyDataSetChanged();
 							dialog.dismiss();
 						}else{
-							Toast.makeText(getApplicationContext(),"วงเงินมากกว่าเงินคงเหลือ กรุณาใส่อีกครั้ง", Toast.LENGTH_LONG).show();
+							Toast.makeText(getApplicationContext(),"จำนวนเงินมากกว่าเงินคงเหลือ กรุณาใส่อีกครั้ง", Toast.LENGTH_LONG).show();
 						}											
 					}catch (Exception e) {
 						AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
