@@ -155,7 +155,7 @@ public class AccountActivity extends Activity {
 					accDesc +=(FixAccountType.FIX_DEPOSIT_ACCOUNT_DESCRIPTION+"\n\n");
 				
 				accDesc = accDesc +"ยอดเงินคงเหลือ :"+ accObj.getCurrentBalance()+"\n\n"+
-						  "วงเงินจำกัด :"+accObj.getLimitUsage();
+						  "จำกัดวงเงินที่ใช้ :"+accObj.getLimitUsage();
 							
 				TextView accountDescription = (TextView) dialog.findViewById(R.id.account_dialog_data_view);
 				accountDescription.setText(accDesc);
