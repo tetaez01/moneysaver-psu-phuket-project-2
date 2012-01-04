@@ -9,7 +9,9 @@ import edusoft.android.account.AccountActivity;
 import edusoft.android.database.DatabaseHelper;
 import edusoft.android.main.MoneySaverMain;
 import edusoft.android.main.R;
+import edusoft.android.reuse.AccountObject;
 import edusoft.android.reuse.BalanceObject;
+import edusoft.android.reuse.FixAccountType;
 import edusoft.android.reuse.FixTypeUsing;
 import edusoft.android.reuse.Utility;
 import android.app.Activity;
@@ -142,9 +144,70 @@ public class BalanceActivity extends Activity {
 	};
 	//การทำงานเมื่อคลิกข้อมูลแต่ละแถว
 	private AdapterView.OnItemClickListener balanceEdit = new OnItemClickListener() {
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			
+		public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
+			try {
+				balanceObject = new BalanceObject();
+				balanceObject.setActivityId((String) listview_data.get(position).get(ACTIVITYIDKEY));
+				balanceObject.setDescription((String) listview_data.get(position).get(DESCRIPTIONKEY));
+				balanceObject.setTypeUsing((String) listview_data.get(position).get(TYPEUSINGKEY));						
+				balanceObject.setAccountId((String) listview_data.get(position).get(ACCOUNTIDKEY));						
+				balanceObject.setDate((String) listview_data.get(position).get(DATEKEY));
+				balanceObject.setTime((String) listview_data.get(position).get(TIMEKEY));
+				balanceObject.setNetPrice((String) listview_data.get(position).get(AMOUNTKEY));	
+												
+				final int index = position;
+				hm = new HashMap<String, Object>();
+				hm = listview_data.get(position);				
+				final Dialog dialog = new Dialog(BalanceActivity.this);
+				dialog.setContentView(R.layout.balance_dialog_data);
+				dialog.setTitle("ข้อมูลรายรับ-รายจ่าย");
+				dialog.setCancelable(true);
+				
+							
+				TextView balTitle = (TextView) dialog.findViewById(R.id.balance_dialog_data_title);
+				balTitle.setText(balanceObject.getDescription());
+				
+				String balDesc = "ประเภทการใช้จ่าย : ";
+				//ประเภทการใช้จ่าย
+				if(balanceObject.getTypeUsing().equals(FixTypeUsing.fixExpense))
+					balDesc +=(FixTypeUsing.fixExpenseDescription+"\n\n");
+				else if(balanceObject.getTypeUsing().equals(FixTypeUsing.fixIncome))
+					balDesc +=(FixTypeUsing.fixIncomeDescription+"\n\n");
+				else if(balanceObject.getTypeUsing().equals(FixTypeUsing.fixTransfer))
+					balDesc +=(FixTypeUsing.fixTransferDescription+"\n\n");
+				else if(balanceObject.getTypeUsing().equals(FixTypeUsing.fixWithdraw))
+					balDesc +=(FixTypeUsing.fixWithdrawDescription+"\n\n");
+				balDesc += "ช่องทางการใช้จ่าย : ";
+				//ประเภทบัญชี
+				if(balanceObject.getAccountId().equals(FixAccountType.FIX_CASH_ACCOUNT_ID))
+					balDesc +=(FixAccountType.FIX_CASH_ACCOUNT_DESCRIPTION+"\n\n");
+				else if(balanceObject.getAccountId().equals(FixAccountType.FIX_CURRENT_ACCOUNT_ID))
+					balDesc +=(FixAccountType.FIX_CURRENT_ACCOUNT_DESCRIPTION+"\n\n");
+				else if(balanceObject.getAccountId().equals(FixAccountType.FIX_SAVING_ACCOUNT_ID))
+					balDesc +=(FixAccountType.FIX_SAVING_ACCOUNT_DESCRIPTION+"\n\n");
+				else if(balanceObject.getAccountId().equals(FixAccountType.FIX_DEPOSIT_ACCOUNT_ID))
+					balDesc +=(FixAccountType.FIX_DEPOSIT_ACCOUNT_DESCRIPTION+"\n\n");
+		
+				balDesc += "วัน : "+ balanceObject.getDate()+"\n\n"+
+						  "เวลา : "+balanceObject.getTime()+"\n\n"+
+						  "จำนวน : "+balanceObject.getNetPrice();
+							
+				TextView balDescription = (TextView) dialog.findViewById(R.id.balance_dialog_data_desc);
+				balDescription.setText(balDesc);
+				
+				Button SubmitButton = (Button) dialog.findViewById(R.id.balance_dialog_data_okButton);
+				SubmitButton.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) { 
+						dialog.dismiss();
+					}
+				});				
+				dialog.show();
+			} catch (Exception e) {
+				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
+				b.setMessage(e.toString());
+				b.show();
+			}
 		}
 	};
 
