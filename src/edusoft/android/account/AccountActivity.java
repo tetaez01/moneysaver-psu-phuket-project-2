@@ -266,42 +266,54 @@ public class AccountActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					try{
-						
-						curDate =new Utility().getCurrentDate();						
+						Utility uti = new Utility();
+						curDate = uti.getCurrentDate();						
 						hm = new HashMap<String, Object>();
-						
-						accObj.setBankId(Integer.toString(bankNameSpinner.getSelectedItemPosition()+1));
-						accObj.setAccountId(accObj.getAccountId());
-						accObj.setAccountNumber(accountDialog_EditTextAccountNumber.getText().toString());
-						accObj.setAccountName(accountDialog_EditTextAccountName.getText().toString());
-						accObj.setAccountTypeId(Integer.toString(categorySpinner.getSelectedItemPosition()+1));
-						accObj.setCurrentBalance(accountDialog_EditTextAmount.getText().toString());
-						accObj.setLimitUsage(accountDialog_EditTextLimited.getText().toString());
-						
-						hm.put(BANKIDKEY, accObj.getBankId());//bankAcronym);
-						hm.put(ACCOUNTNUMBERKEY, accObj.getAccountNumber());
-						hm.put(ACCOUNTNAMEKEY, accObj.getAccountName());
-						hm.put(IMGKEY, getResources().getIdentifier(dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym(), "drawable", getPackageName()));
-						hm.put(CATEGORYIDKEY, accObj.getAccountTypeId());//dbHelp.getAccTypeByAccountTypeId(accObj.getAccountTypeId()).getAccountType());
-						hm.put(CURRENTBALANCEKEY,accObj.getCurrentBalance());
-						hm.put(CURRENTDATEKEY, new Utility().getCurrentDate());
-						hm.put(LIMITKEY, new Utility().addDecimal(accObj.getLimitUsage()));
-						hm.put(EXPENSEKEY, new Utility().addDecimal("0.00"));
-						if (calculatePercentage("0.00", "0.00") == 100)
-							hm.put(PERCENTAGEKEY, calculatePercentage("0.00","0.00"));
+						if(accountDialog_EditTextAccountNumber.getText().toString().trim().length()  >   0   &&
+						   accountDialog_EditTextAccountName.getText().toString().trim().length()    >   0   &&
+						   accountDialog_EditTextAmount.getText().toString().trim().length()         >   0   &&
+						   accountDialog_EditTextLimited.getText().toString().trim().length()        >   0     )
+						{
+					
+							accObj.setBankId(Integer.toString(bankNameSpinner.getSelectedItemPosition()+1));
+							accObj.setAccountId(accObj.getAccountId());
+							accObj.setAccountNumber(accountDialog_EditTextAccountNumber.getText().toString());
+							accObj.setAccountName(accountDialog_EditTextAccountName.getText().toString());
+							accObj.setAccountTypeId(Integer.toString(categorySpinner.getSelectedItemPosition()+1));
+							accObj.setCurrentBalance(accountDialog_EditTextAmount.getText().toString());
+							accObj.setLimitUsage(accountDialog_EditTextLimited.getText().toString());
+							
+							hm.put(BANKIDKEY, accObj.getBankId());//bankAcronym);
+							hm.put(ACCOUNTNUMBERKEY, accObj.getAccountNumber());
+							hm.put(ACCOUNTNAMEKEY, accObj.getAccountName());
+							hm.put(IMGKEY, getResources().getIdentifier(dbHelp.getBankObjectByBankId(accObj.getBankId()).getBankAcronym(), "drawable", getPackageName()));
+							hm.put(CATEGORYIDKEY, accObj.getAccountTypeId());//dbHelp.getAccTypeByAccountTypeId(accObj.getAccountTypeId()).getAccountType());
+							hm.put(CURRENTBALANCEKEY,accObj.getCurrentBalance());
+							hm.put(CURRENTDATEKEY, new Utility().getCurrentDate());
+							hm.put(LIMITKEY, new Utility().addDecimal(accObj.getLimitUsage()));
+							hm.put(EXPENSEKEY, new Utility().addDecimal("0.00"));
+							if (calculatePercentage("0.00", "0.00") == 100)
+								hm.put(PERCENTAGEKEY, calculatePercentage("0.00","0.00"));
+							else
+								hm.put(PERCENTAGEKEY, 100.00 - calculatePercentage("0.00", "0.00"));
+							
+							if(canEdit){							
+								dbHelp.editLimitedUsageForAccount(accObj);
+								hm.put(ACCOUNTIDKEY, accObj.getAccountId());							
+								listview_data.set(row, hm);
+								Toast.makeText(getApplicationContext(),"แก้ไขข้อมูลเรียบร้อย", Toast.LENGTH_LONG).show();
+							}else{
+								hm.put(ACCOUNTIDKEY, dbHelp.addAccount(accObj));
+								listview_data.add(hm);
+								Toast.makeText(getApplicationContext(),"เพิ่มข้อมูลเรียบร้อย", Toast.LENGTH_LONG).show();
+							}			
+							listLayout.notifyDataSetChanged();
+							dialog.dismiss();
+						}
 						else
-							hm.put(PERCENTAGEKEY, 100.00 - calculatePercentage("0.00", "0.00"));
-						
-						if(canEdit){							
-							dbHelp.editLimitedUsageForAccount(accObj);
-							hm.put(ACCOUNTIDKEY, accObj.getAccountId());							
-							listview_data.set(row, hm);
-						}else{
-							hm.put(ACCOUNTIDKEY, dbHelp.addAccount(accObj));
-							listview_data.add(hm);
-						}											
-						listLayout.notifyDataSetChanged();
-						dialog.dismiss();
+						{
+							Toast.makeText(getApplicationContext(),"กรุณากรอกข้อมูลให้ครบถ้วน", Toast.LENGTH_LONG).show();
+						}														
 					}catch(Exception e) {
 						AlertDialog.Builder b = new AlertDialog.Builder(AccountActivity.this);
 						b.setMessage(e.toString());

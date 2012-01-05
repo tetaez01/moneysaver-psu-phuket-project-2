@@ -21,7 +21,7 @@ public class Utility extends Activity{
 	}
 
 	public boolean isNotNull(String value) {
-		if (value != "" || value != null)
+		if (!value.equals("")  || !value.equals(null) )
 			isNotNull = true;
 		return isNotNull;
 	}

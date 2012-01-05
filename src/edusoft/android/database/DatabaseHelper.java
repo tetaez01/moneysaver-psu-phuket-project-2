@@ -721,7 +721,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public String getAmountExpenseInCurrentMonth(String month,String accountId){
 		String expenseAmount = ""; 
 		SQLiteDatabase db = this.getWritableDatabase();
-		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colAccountTypeUsingId+" <> '2' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
 			expenseAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
