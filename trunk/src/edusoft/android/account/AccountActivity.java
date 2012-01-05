@@ -200,12 +200,14 @@ public class AccountActivity extends Activity {
 			//ดึงรายการรับทั้งหมดของ บัญชีนั้น ๆ มา
 			String income = new Utility().addDecimal(dbHelp.getAmountIncomeInCurrentMonth(Integer.toString(Integer.parseInt(curMonth)+1),accObj.getAccountId()));
 			hm.put(INCOMEKEY, income);
-			totalIncome+= Double.parseDouble(income);
+			if(Double.parseDouble(income) > 0)
+				totalIncome+= Double.parseDouble(income);
 			
 			//ดึงรายการจ่ายทั้งหมดของ บัญชีนั้น ๆ มา
 			String expense = new Utility().addDecimal(dbHelp.getAmountExpenseInCurrentMonth(Integer.toString(Integer.parseInt(curMonth)+1),accObj.getAccountId()));
 			hm.put(EXPENSEKEY, expense);
-			totalExpense += Double.parseDouble(expense);
+			if(Double.parseDouble(expense) > 0)
+				totalExpense += Double.parseDouble(expense);
 			
 			//วงเงินจำกัดของบัญชีนั้น ๆ 
 			String limitUsage = new Utility().addDecimal(accObj.getLimitUsage());
