@@ -298,31 +298,39 @@ public class BalanceActivity extends Activity {
 						mDay = c.get(Calendar.DAY_OF_MONTH);
 						mHour = c.get(Calendar.HOUR_OF_DAY);
 						mMinute = c.get(Calendar.MINUTE);
-						
-						bal.setActivityId(bal.getActivityId());
-						bal.setDescription(editTextDescription.getText().toString());
-						bal.setTypeUsing(Integer.toString(payTypeSpinner.getSelectedItemPosition()));						
-						bal.setAccountId(getAccountIdWithIndex(payUsingWaySpinner.getSelectedItemPosition()));						
-						bal.setDate(txtDate.getText().toString().substring(txtDate.getText().toString().indexOf(": ")+2));
-						bal.setTime(txtTime.getText().toString().substring(txtTime.getText().toString().indexOf(": ")+2));
-						bal.setNetPrice(editTextAmount.getText().toString());						
+						if(editTextDescription.getText().toString().trim().length()  >   0   &&
+					       editTextAmount.getText().toString().trim().length()  	 >   0     )
+						{
+							bal.setActivityId(bal.getActivityId());
+							bal.setDescription(editTextDescription.getText().toString());
+							bal.setTypeUsing(Integer.toString(payTypeSpinner.getSelectedItemPosition()));						
+							bal.setAccountId(getAccountIdWithIndex(payUsingWaySpinner.getSelectedItemPosition()));						
+							bal.setDate(txtDate.getText().toString().substring(txtDate.getText().toString().indexOf(": ")+2));
+							bal.setTime(txtTime.getText().toString().substring(txtTime.getText().toString().indexOf(": ")+2));
+							bal.setNetPrice(editTextAmount.getText().toString());						
 
-						if(canEdit){				
-							updateTabData = dbHelp.editActivity(bal);	
-						}else{
-							//Toast.makeText(getApplicationContext(),dbHelp.getCurrentBalanceWithAccountId(bal.getAccountId()) +","+ bal.getNetPrice(), Toast.LENGTH_LONG).show();
-							updateTabData = dbHelp.addActivity(bal);			
+							if(canEdit){				
+								updateTabData = dbHelp.editActivity(bal);	
+							}else{
+								//Toast.makeText(getApplicationContext(),dbHelp.getCurrentBalanceWithAccountId(bal.getAccountId()) +","+ bal.getNetPrice(), Toast.LENGTH_LONG).show();
+								updateTabData = dbHelp.addActivity(bal);			
+							}
+							
+							if(updateTabData){
+								//ทำการดึงข้อมูลมาใหม่เพื่อให้ ข้อมูลถูกเรียงตามวัน-เวลาที่ทำกิจกรรม
+								listview_data.clear();							
+								listview_data = getAllActivity(dbHelp.getActivityListData(curDate));							
+								listLayout.notifyDataSetChanged();
+								dialog.dismiss();
+							}else{
+								Toast.makeText(getApplicationContext(),"จำนวนเงินมากกว่าเงินคงเหลือ กรุณาใส่อีกครั้ง", Toast.LENGTH_LONG).show();
+							}			
 						}
-						
-						if(updateTabData){
-							//ทำการดึงข้อมูลมาใหม่เพื่อให้ ข้อมูลถูกเรียงตามวัน-เวลาที่ทำกิจกรรม
-							listview_data.clear();							
-							listview_data = getAllActivity(dbHelp.getActivityListData(curDate));							
-							listLayout.notifyDataSetChanged();
-							dialog.dismiss();
-						}else{
-							Toast.makeText(getApplicationContext(),"จำนวนเงินมากกว่าเงินคงเหลือ กรุณาใส่อีกครั้ง", Toast.LENGTH_LONG).show();
-						}											
+						else
+						{
+							Toast.makeText(getApplicationContext(),"กรุณากรอกข้อมูลให้ครบถ้วน", Toast.LENGTH_LONG).show();
+						}
+														
 					}catch (Exception e) {
 						AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
 						b.setMessage(e.toString());
