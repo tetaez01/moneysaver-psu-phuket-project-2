@@ -709,10 +709,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public String getAmountIncomeInCurrentMonth(String month,String accountId){
 		String incomeAmount = ""; 
 		SQLiteDatabase db = this.getWritableDatabase();
-		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" = '0' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
+		String whereWithdraw = "";
+		if(accountId.equals("0"))
+		{
+			whereWithdraw = "OR "+colAccountTypeUsingId+" = '2'";
+		}
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS income FROM "+activityTable+" WHERE ("+colAccountTypeUsingId+" = '0' "+whereWithdraw+") AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
-			incomeAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
+			incomeAmount = Double.toString(cur.getDouble(cur.getColumnIndex("income")));
+			if(accountId.equals("0"))
+			{
+				incomeAmount  =  Double.toString(cur.getDouble(cur.getColumnIndex("income")) + getAmountWithdrawInCurrentMonth(month));
+			}
 		}
 		cur.close();
 		return incomeAmount;	
@@ -721,10 +730,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public String getAmountExpenseInCurrentMonth(String month,String accountId){
 		String expenseAmount = ""; 
 		SQLiteDatabase db = this.getWritableDatabase();
-		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colAccountTypeUsingId+" <> '2' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colActivityDate+" like '%/"+month+"/%' AND "+colAccountId+"="+accountId, null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
 			expenseAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
+		}
+		cur.close();
+		return expenseAmount;	
+	}
+	//ดึงรายการถอนเงินทั้งหมดมาแสดง
+	public double getAmountWithdrawInCurrentMonth(String month){
+		double expenseAmount = 0; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS withdraw FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" = '2' AND "+colActivityDate+" like '%/"+month+"/%'", null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			expenseAmount = cur.getDouble(cur.getColumnIndex("withdraw"));				
 		}
 		cur.close();
 		return expenseAmount;	
@@ -734,7 +755,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	{
 		String incomeAmount = "0.00"; 
 		SQLiteDatabase db = this.getWritableDatabase();
-		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" = '0' AND "+colActivityDate+" ='"+date+"'", null);
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE ("+colAccountTypeUsingId+" = '0' OR "+colAccountTypeUsingId+" = '2') AND "+colActivityDate+" ='"+date+"'", null);
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
 			incomeAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
