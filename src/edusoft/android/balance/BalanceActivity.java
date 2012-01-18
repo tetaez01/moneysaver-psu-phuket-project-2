@@ -1,5 +1,6 @@
 package edusoft.android.balance;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -21,8 +22,16 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,22 +51,26 @@ import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class BalanceActivity extends Activity {
-
+	public final int CAMERA_RESULT = 0;
+	
 	BalanceObject balanceObject;
+	Bitmap bmp;
+	
 	private ArrayList<HashMap<String, Object>> listview_data;
 	private HashMap<String, Object> hm;
 	private ListView lv1;
 	private TextView txt_totalIncome;
 	private TextView txt_totalExpense;
-
 	private TextView editTextDescription;
 	private TextView editTextAmount;
 	private TextView txtDate;
 	private TextView txtTime;
 	private Button addBalance;
 	private Button viewByDate;
+	private ImageView imageCam;
 	private Spinner payTypeSpinner;
 	private Spinner payUsingWaySpinner;
+	private Button buttunCamera;
 	private Button buttonCalendar;
 	private Button buttonTime;
 	private Button submitButton;
@@ -68,7 +81,7 @@ public class BalanceActivity extends Activity {
 	List activityList ;
 	
 	private String payTypeList[] = { "รายรับ", "รายจ่าย", "ถอนเงิน", "โอนเงิน" };
-	
+	public static int TAKE_IMAGE = 111;
 	private static final String ACTIVITYIDKEY = "activityId";
 	private static final String ACCOUNTIDKEY = "accountId";
 	private static final String IMGKEY = "image";
@@ -95,33 +108,27 @@ public class BalanceActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.balance_main);
-		listview_data = new ArrayList<HashMap<String, Object>>();
-		lv1 = (ListView) findViewById(R.id.balance_main_balancelist);
-
+		
+		
 		try {
+			onCreateInitailLayout();
+			listview_data = new ArrayList<HashMap<String, Object>>();
 			dbHelp = new DatabaseHelper(this);
 			activityList = new ArrayList();
-			
-			
+				
 			curDate = new Utility().getCurrentDate();
-
+			
 			activityList = dbHelp.getActivityListData(curDate);
 			
-			
-			txt_totalIncome = (TextView) findViewById(R.id.balance_main_totalIncome);
-			txt_totalExpense = (TextView) findViewById(R.id.balance_main_totalExpense);
-
 			txt_totalIncome.setText(dbHelp.getIncomeAmountByDate(curDate));
 			txt_totalExpense.setText(dbHelp.getExpenseAmountByDate(curDate));
 			listLayout = new ListViewLayout(getAllActivity(activityList),this);
 
 			lv1.setAdapter(listLayout);
-			lv1.setOnItemClickListener(balanceEdit);
+			lv1.setOnItemClickListener(balanceEdit);		
 			
-			viewByDate = (Button) findViewById(R.id.balance_main_calendarView);
 			viewByDate.setOnClickListener(dateDataPicker);
-			
-			addBalance = (Button) findViewById(R.id.balance_main_add);
+				
 			addBalance.setOnClickListener(buttonAddBalance);
 			
 			mDay = Integer.parseInt(new Utility().getCurrentDay());
@@ -132,6 +139,30 @@ public class BalanceActivity extends Activity {
 			b.setMessage(e.toString());
 			b.show();
 		}
+	}
+	//======================================= initial layout ===========================================
+	private void onCreateInitailLayout()
+	{
+		lv1 = (ListView) findViewById(R.id.balance_main_balancelist);
+		txt_totalIncome = (TextView) findViewById(R.id.balance_main_totalIncome);
+		txt_totalExpense = (TextView) findViewById(R.id.balance_main_totalExpense);
+		viewByDate = (Button) findViewById(R.id.balance_main_calendarView);
+		addBalance = (Button) findViewById(R.id.balance_main_add);		
+	}
+	private void dialogManageDataLayout(Dialog dialog)
+	{
+		editTextDescription = (EditText) dialog.findViewById(R.id.balance_dialog_add_editTextDescription);
+		editTextAmount = (EditText) dialog.findViewById(R.id.balance_dialog_add_editTextAmount);			
+		payTypeSpinner = (Spinner) dialog.findViewById(R.id.balance_dialog_add_spinnerUsingType);
+		imageCam = (ImageView) dialog.findViewById(R.id.balance_dialog_imgCam);
+		buttunCamera =(Button) dialog.findViewById(R.id.balance_dialog_add_ButtonCamera);
+		payUsingWaySpinner = (Spinner) dialog.findViewById(R.id.balance_dialog_add_spinnerUsingWay);
+		txtDate = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewDate);
+		txtTime = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewTime);
+		buttonCalendar = (Button) dialog.findViewById(R.id.balance_dialog_add_ButtonCalendar);
+		txtTime = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewTime);
+		buttonTime = (Button) dialog.findViewById(R.id.balance_dialog_add_ButtonTime);
+		submitButton = (Button) dialog.findViewById(R.id.balance_dialog_add_buttonOK);
 	}
 	//======================================= Listenner ================================================
 	
@@ -246,26 +277,24 @@ public class BalanceActivity extends Activity {
 			final Dialog dialog = new Dialog(BalanceActivity.this);
 			dialog.setContentView(R.layout.balance_dialog_add);
 			
-			dialog.setCancelable(true);			
+			dialog.setCancelable(true);		
+			dialogManageDataLayout(dialog);
 			//ดึงตัวแปร layout จากไฟล์ xml
-			editTextDescription = (EditText) dialog.findViewById(R.id.balance_dialog_add_editTextDescription);
-			editTextAmount = (EditText) dialog.findViewById(R.id.balance_dialog_add_editTextAmount);			
-			payTypeSpinner = (Spinner) dialog.findViewById(R.id.balance_dialog_add_spinnerUsingType);
+			
 			adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeList);
 			adapterPayType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				
+			buttunCamera.setOnClickListener(takePhoto);
+
 			payTypeSpinner.setAdapter(adapterPayType);		
-			payUsingWaySpinner = (Spinner) dialog.findViewById(R.id.balance_dialog_add_spinnerUsingWay);
+			
 			adapterPayUsing = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item,getBankInAccount() );
 			adapterPayUsing.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			payUsingWaySpinner.setAdapter(adapterPayUsing);		
-			txtDate = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewDate);
-			txtTime = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewTime);
-			buttonCalendar = (Button) dialog.findViewById(R.id.balance_dialog_add_ButtonCalendar);
+			
 			buttonCalendar.setOnClickListener(datePicker);
-			txtTime = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewTime);
-			buttonTime = (Button) dialog.findViewById(R.id.balance_dialog_add_ButtonTime);
-			buttonTime.setOnClickListener(timePicker);
-			submitButton = (Button) dialog.findViewById(R.id.balance_dialog_add_buttonOK);
+			
+			buttonTime.setOnClickListener(timePicker);			
 			
 			mYear = c.get(Calendar.YEAR);
 			mMonth = c.get(Calendar.MONTH);
@@ -468,7 +497,38 @@ public class BalanceActivity extends Activity {
 			minute = "0" + Integer.toString(mMinute);
 		this.txtTime.setText(new StringBuilder().append("เวลา : ").append(hour).append(".").append(minute));
 	}
-	
+	//======================================ส่วนในการทำงานของ การถ่ายรูปในหน้า กิจกรรม===================================== 
+	private OnClickListener takePhoto = new OnClickListener() {
+		public void onClick(View view) {
+			File imageFile = new File(getImagePath());
+			Uri imageFileUri = Uri.fromFile(imageFile);
+			Intent i = new Intent(
+					android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
+					imageFileUri);
+			startActivityForResult(i, CAMERA_RESULT);
+		}
+	};
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+		switch (requestCode) {
+		case CAMERA_RESULT:
+			if (resultCode == RESULT_OK) {
+				Log.v("RESULTS", "HERE");
+				bmp = BitmapFactory.decodeFile(getImagePath());
+				bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
+				imageCam.setImageBitmap(bmp);
+				Log.v("RESULTS", "Image Width: " + bmp.getWidth());
+				Log.v("RESULTS", "Image Height: " + bmp.getHeight());
+			}
+			break;
+		}
+	}
+	public String getImagePath()
+	{
+		return  Environment.getExternalStorageDirectory().getAbsolutePath() + "/tmp_image.jpg";
+	}
 	//================================== การดึงข้อมูลมาจาก Database ================================================
 	
 	// method ที่เอาใว้ใช้ในการดึง บัญชีที่เรามีทั้งหมดมาแสดง ในหน้า เพิ่ม กิจกรรม หรือ แก้ไขกิจกรรม
