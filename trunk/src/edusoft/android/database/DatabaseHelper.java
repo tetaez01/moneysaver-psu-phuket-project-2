@@ -1,6 +1,7 @@
 package edusoft.android.database;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -64,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String colActivityId = "activity_id";
 	//public static final String colAccountTypeUsingId = "fix_account_type_using_id";
 	public static final String colActivityDescription = "description";
-	//public static final String colActivityPathUsing = "path_using";
+	public static final String colActivityImage = "image";
 	public static final String colActivityDate = "date";
 	public static final String colActivityTime = "time";
 	public static final String colActivityNetPrice = "net_price";
@@ -104,11 +107,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 					+ colAccountLimitUsage + " NUMBER,"
 					+ colAccountCurrentBalance + " NUMBER)");
 			
+			
 			db.execSQL("CREATE TABLE " + activityTable + " (" 
 					+ colActivityId + " INTEGER PRIMARY KEY AUTOINCREMENT,"
 					+ colAccountId + " INTEGER , " 
 					+ colAccountTypeUsingId + " TEXT NOT NULL,"
 					+ colActivityDescription + " TEXT NOT NULL," 
+					+ colActivityImage + " BLOB,"
 					+ colActivityDate + " TEXT NOT NULL," 
 					+ colActivityTime + " TEXT NOT NULL," 
 					+ colActivityNetPrice+ " NUMERIC)");
@@ -643,8 +648,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				&& (getCurrentBalanceWithAccountId(balObj.getAccountId()) >= Double.parseDouble(balObj.getNetPrice())))
 				|| balObj.getTypeUsing().equals(FixTypeUsing.fixIncome))
 		{
-			db.execSQL("INSERT INTO activity(account_id,fix_account_type_using_id,description,date,time,net_price) VALUES(" 
-					+ balObj.getAccountId()+","+balObj.getTypeUsing()+",'"+balObj.getDescription()+"','"+balObj.getDate()+"','"+balObj.getTime()+"',"+balObj.getNetPrice()+")");		
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			balObj.getBitmap().compress(Bitmap.CompressFormat.PNG, 100, out);
+			db.execSQL("INSERT INTO activity(account_id,fix_account_type_using_id,description,image,date,time,net_price) VALUES(" 
+					+ balObj.getAccountId()+","+balObj.getTypeUsing()+",'"+balObj.getDescription()+"','"+out.toByteArray()+"','"+balObj.getDate()+"','"+balObj.getTime()+"',"+balObj.getNetPrice()+")");		
 			double addNetPrice = Double.parseDouble(balObj.getNetPrice());
 			//ตรวจสอบว่าเป็นรายรับหรือรายจ่าย
 			if(!balObj.getTypeUsing().equals("0")) 				addNetPrice = addNetPrice*-1;
