@@ -1,10 +1,13 @@
 package edusoft.android.reuse;
 
+import android.graphics.Bitmap;
+
 public class BalanceObject {
 	private String activityId = "";
 	private String accountId = "";
 	private String typeUsing = "";
 	private String description = "";
+	private Bitmap bm;
 	private String date = "";
 	private String time = "";
 	private String netPrice = "";
@@ -33,6 +36,14 @@ public class BalanceObject {
 	public String getDescription(){
 		return description;
 	}	
+	public void setBitmap(Bitmap bm)
+	{
+		this.bm = bm;
+	}
+	public Bitmap getBitmap()
+	{
+		return bm;
+	}
 	public void setDate(String date){
 		this.date = date;
 	}

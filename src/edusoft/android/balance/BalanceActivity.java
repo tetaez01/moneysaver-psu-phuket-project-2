@@ -332,6 +332,7 @@ public class BalanceActivity extends Activity {
 						{
 							bal.setActivityId(bal.getActivityId());
 							bal.setDescription(editTextDescription.getText().toString());
+							bal.setBitmap(bmp);
 							bal.setTypeUsing(Integer.toString(payTypeSpinner.getSelectedItemPosition()));						
 							bal.setAccountId(getAccountIdWithIndex(payUsingWaySpinner.getSelectedItemPosition()));						
 							bal.setDate(txtDate.getText().toString().substring(txtDate.getText().toString().indexOf(": ")+2));
