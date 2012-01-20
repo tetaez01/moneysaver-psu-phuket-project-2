@@ -84,7 +84,8 @@ public class BalanceActivity extends Activity {
 	DatabaseHelper dbHelp;
 	List activityList ;
 	
-	private String payTypeList[] = { "รายรับ", "รายจ่าย", "ถอนเงิน", "โอนเงิน" };
+	private String payTypeForAccount[] = { "รายรับ", "รายจ่าย", "ถอนเงิน", "โอนเงิน" };
+	private String payTypeForCash[] = { "รายรับ", "รายจ่าย"};
 	public static int TAKE_IMAGE = 111;
 	private static final String ACTIVITYIDKEY = "activityId";
 	private static final String ACCOUNTIDKEY = "accountId";
@@ -171,9 +172,9 @@ public class BalanceActivity extends Activity {
 		editTextDescription = (EditText) dialog.findViewById(R.id.balance_dialog_add_editTextDescription);
 		editTextAmount = (EditText) dialog.findViewById(R.id.balance_dialog_add_editTextAmount);			
 		payTypeSpinner = (Spinner) dialog.findViewById(R.id.balance_dialog_add_spinnerUsingType);
-		imageCam = (ImageView) dialog.findViewById(R.id.balance_dialog_imgCam);
-		buttunCamera =(Button) dialog.findViewById(R.id.balance_dialog_add_ButtonCamera);
 		payUsingWaySpinner = (Spinner) dialog.findViewById(R.id.balance_dialog_add_spinnerUsingWay);
+		imageCam = (ImageView) dialog.findViewById(R.id.balance_dialog_imgCam);
+		buttunCamera =(Button) dialog.findViewById(R.id.balance_dialog_add_ButtonCamera);	
 		txtDate = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewDate);
 		txtTime = (TextView) dialog.findViewById(R.id.balance_dialog_add_textViewTime);
 		buttonCalendar = (Button) dialog.findViewById(R.id.balance_dialog_add_ButtonCalendar);
@@ -189,6 +190,30 @@ public class BalanceActivity extends Activity {
 		submitButton = (Button) dialog.findViewById(R.id.balance_dialog_data_okButton);
 	}
 	//======================================= Listenner ================================================
+	// Spinner ของบัญชีที่เลือก
+	private AdapterView.OnItemSelectedListener payUsingWaySpinner_listenner = new AdapterView.OnItemSelectedListener() {
+		public void onItemSelected(AdapterView<?> parent,
+				View view, int pos, long id) {			
+			//String distanceRest = parent.getItemAtPosition(pos).toString();
+			//getDistance(distanceRest);
+			if(pos == 0)
+			{
+				adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeForCash);
+				adapterPayType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				payTypeSpinner.setAdapter(adapterPayType);
+			}
+			else
+			{
+				adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeForAccount);
+				adapterPayType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+				payTypeSpinner.setAdapter(adapterPayType);				
+			}
+				
+		}
+
+		public void onNothingSelected(AdapterView<?> parent) {
+		}
+	};
 	//การทำงานเมื่อกดปุ่ม +
 	private OnClickListener buttonAddBalance = new OnClickListener() {
 		public void onClick(View view) {
@@ -386,16 +411,16 @@ public class BalanceActivity extends Activity {
 			dialogManageDataLayout(dialog);
 			//ดึงตัวแปร layout จากไฟล์ xml
 			
-			adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeList);
+			adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeForCash);
 			adapterPayType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				
+			payTypeSpinner.setAdapter(adapterPayType);	
+			
 			buttunCamera.setOnClickListener(takePhoto);
-
-			payTypeSpinner.setAdapter(adapterPayType);		
 			
 			adapterPayUsing = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item,getBankInAccount() );
 			adapterPayUsing.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			payUsingWaySpinner.setAdapter(adapterPayUsing);		
+			payUsingWaySpinner.setAdapter(adapterPayUsing);	
+			payUsingWaySpinner.setOnItemSelectedListener(payUsingWaySpinner_listenner);
 			
 			buttonCalendar.setOnClickListener(datePicker);
 			

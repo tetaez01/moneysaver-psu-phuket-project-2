@@ -6,7 +6,11 @@
 		android:layout_height="wrap_content" />
 	<EditText android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/balance_dialog_add_editTextDescription" />
-
+	<TextView android:text="ช่องทางการใช้จ่าย"
+		android:layout_width="fill_parent" android:layout_height="wrap_content" />
+	<Spinner android:layout_width="fill_parent"
+		android:id="@+id/balance_dialog_add_spinnerUsingWay" android:prompt="@string/payway"
+		android:layout_height="wrap_content"></Spinner>
 	<!-- //////////// -->
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:orientation="horizontal" android:layout_width="fill_parent"
@@ -46,11 +50,7 @@
 		android:layout_height="wrap_content" /> <Spinner android:layout_width="fill_parent" 
 		android:id="@+id/balance_dialog_add_spinnerUsingType" android:prompt="@string/paytype" 
 		android:layout_height="wrap_content"></Spinner> -->
-	<TextView android:text="ช่องทางการใช้จ่าย"
-		android:layout_width="fill_parent" android:layout_height="wrap_content" />
-	<Spinner android:layout_width="fill_parent"
-		android:id="@+id/balance_dialog_add_spinnerUsingWay" android:prompt="@string/payway"
-		android:layout_height="wrap_content"></Spinner>
+	
 
 	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
