@@ -23,9 +23,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.widget.Toast;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -106,7 +106,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 					+ colAccountName + " TEX NOT NULL,"					
 					+ colAccountLimitUsage + " NUMBER,"
 					+ colAccountCurrentBalance + " NUMBER)");
-			
 			
 			db.execSQL("CREATE TABLE " + activityTable + " (" 
 					+ colActivityId + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -648,10 +647,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				&& (getCurrentBalanceWithAccountId(balObj.getAccountId()) >= Double.parseDouble(balObj.getNetPrice())))
 				|| balObj.getTypeUsing().equals(FixTypeUsing.fixIncome))
 		{
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			balObj.getBitmap().compress(Bitmap.CompressFormat.PNG, 100, out);
-			db.execSQL("INSERT INTO activity(account_id,fix_account_type_using_id,description,image,date,time,net_price) VALUES(" 
-					+ balObj.getAccountId()+","+balObj.getTypeUsing()+",'"+balObj.getDescription()+"','"+out.toByteArray()+"','"+balObj.getDate()+"','"+balObj.getTime()+"',"+balObj.getNetPrice()+")");		
+			ContentValues activityValues = new ContentValues();
+		    activityValues.put(colAccountId, balObj.getAccountId());
+		    activityValues.put(colAccountTypeUsingId,balObj.getTypeUsing());
+		    activityValues.put(colActivityDescription, balObj.getDescription());
+		    if(balObj.getBitmap() != null)
+		    {
+		    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+				balObj.getBitmap().compress(Bitmap.CompressFormat.JPEG, 50, out);
+				activityValues.put(colActivityImage,out.toByteArray());	
+		    }			
+			/*db.execSQL("INSERT INTO activity(account_id,fix_account_type_using_id,description,image,date,time,net_price) VALUES(" 
+					+ balObj.getAccountId()+","+balObj.getTypeUsing()+",'"+balObj.getDescription()+"','"+out.toByteArray()+"','"+balObj.getDate()+"','"+balObj.getTime()+"',"+balObj.getNetPrice()+")");	*/		    	    
+		    activityValues.put(colActivityDate,balObj.getDate());
+		    activityValues.put(colActivityTime,balObj.getTime());
+		    activityValues.put(colActivityNetPrice,balObj.getNetPrice());
+		    db.insert(activityTable, null, activityValues);
+
+
 			double addNetPrice = Double.parseDouble(balObj.getNetPrice());
 			//ตรวจสอบว่าเป็นรายรับหรือรายจ่าย
 			if(!balObj.getTypeUsing().equals("0")) 				addNetPrice = addNetPrice*-1;
@@ -672,6 +685,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		ContentValues cv = new ContentValues();
 		cv.put(colAccountId, Integer.parseInt(balObj.getAccountId()));
 		cv.put(colAccountTypeUsingId, Integer.parseInt(balObj.getTypeUsing()));
+		if(balObj.getBitmap() != null)
+	    {
+	    	ByteArrayOutputStream out = new ByteArrayOutputStream();
+			balObj.getBitmap().compress(Bitmap.CompressFormat.JPEG, 50, out);
+			cv.put(colActivityImage,out.toByteArray());	
+	    }			
 		cv.put(colActivityDescription, balObj.getDescription());
 		cv.put(colActivityDate, balObj.getDate());
 		cv.put(colActivityTime, balObj.getTime());
@@ -793,7 +812,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				balObj.setActivityId(Integer.toString(cur.getInt(cur.getColumnIndex(colActivityId))));
 				balObj.setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));//setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));
 				balObj.setTypeUsing(cur.getString(cur.getColumnIndex(colAccountTypeUsingId)));//setBankId(Integer.toString(cur.getInt(cur.getColumnIndex(colbankId))));
-				balObj.setDescription(cur.getString(cur.getColumnIndex(colActivityDescription)));//setAccountTypeId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountTypeId))));
+				balObj.setDescription(cur.getString(cur.getColumnIndex(colActivityDescription)));//setAccountTypeId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountTypeId))));				
 				balObj.setDate(cur.getString(cur.getColumnIndex(colActivityDate)));//setCurrentBalance((Double.toString(cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)))));
 				balObj.setTime(cur.getString(cur.getColumnIndex(colActivityTime)));
 				balObj.setNetPrice(Double.toString(cur.getDouble(cur.getColumnIndex(colActivityNetPrice))));
@@ -803,7 +822,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		cur.close();
 		return listActivity;
 	}
-	//คำนวนค่าเดิมจากการแก้ไขว่าเป็นการเพิ่มตัวเลข หรือ ลดตัวเลข เพื่อจะไปปรับในบัญชี account ว่าควรจะ + หรือ - เช่น เดิมจ่าย 100 บาท แล้วแก้เป็น 200 แปลว่าจ่ายเพิ่ม 100 บาท ก็เอา 100 บาทนั้นไปลบใน balance ของ account นั้น ๆ  
+	//ดึงรูปของ activity มาแสดง
+	public Bitmap getActivityImageById(String activityId,Bitmap noImageBitmap)
+	{
+		Bitmap bmp = null;
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT image FROM " + activityTable + " WHERE "+colActivityId +"="+activityId+" AND image IS NOT NULL", null);
+		if(cur.getCount() > 0)
+		{
+			cur.moveToFirst();
+			//เอารูปจาก database
+			byte[] blob = cur.getBlob(cur.getColumnIndex(colActivityImage));
+			bmp = BitmapFactory.decodeByteArray(blob, 0, blob.length);
+		}
+		else
+		{
+			bmp = noImageBitmap;
+		}					
+		return bmp;
+	}
 	public BalanceObject getActivityDatailWithId(String activityId)
 	{
 		BalanceObject balObj = new BalanceObject();
@@ -825,257 +862,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	}
 
 	//=============================== REUSE ===============================================
-
-	
-	
-	/*public ContentValues putAccObjToContentValue(AccountObject accObj){
-		cv = new ContentValues();
-		cv.put(colAccountId, Integer.parseInt(accObj.getAccountId()));
-		cv.put(colbankId, Integer.parseInt(accObj.getBankId()));
-		cv.put(colAccountType, accObj.getAccountTypeId());
-		cv.put(colAccountLimitUsage, Double.parseDouble(accObj.getLimitUsage()));
-		cv.put(colAccountCurrentBalance, Double.parseDouble(accObj.getCurrentBalance()));
-		return cv;
-	}*/
-	/*public ContentValues putBalObjToContentValue(BalanceObject balObj){
-		cv = new ContentValues();
-		cv.put(colAccountId, Integer.parseInt(balObj.getAccountId()));
-		cv.put(colAccountTypeUsingId, balObj.getTypeUsing());
-		cv.put(colActivityDescription, balObj.getDescription());
-		cv.put(colActivityPathUsing, balObj.getPathUsing());
-		cv.put(colActivityDate, balObj.getDate());
-		cv.put(colActivityTime, balObj.getTime());
-		cv.put(colActivityNetPrice, Double.parseDouble(balObj.getNetPrice()));
-		return cv;
-	}*/
-	
-	/*public String[] convertListAccTypeToAccTypeIdArray(List listAccountType){
-		accTypeObj = new AccountTypeObject();
-		String[] accTypeId = new String[listAccountType.size()];
-		for (int i = 0; i < listAccountType.size(); i++) {
-			accTypeObj =(AccountTypeObject) listAccountType.get(i);
-			accTypeId[i] = accTypeObj.getAccountTypeId();
-		}
-		return accTypeId;
-	}*/
-	
-	/*public String[] convertListAccTypeToAccTypeArray(List listAccountType){
-		accTypeObj = new AccountTypeObject();
-		String[] accType = new String[listAccountType.size()];
-		for (int i = 0; i < listAccountType.size(); i++) {
-			accTypeObj =(AccountTypeObject) listAccountType.get(i);
-			accType[i] = accTypeObj.getAccountType();
-		}
-		return accType;
-	}*/
-	
-
-	/*public AccountObject curToAccObj(Cursor cur){
-		cur.moveToFirst();
-		accObj.setAccountId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountId))));
-		accObj.setBankId(Integer.toString(cur.getInt(cur.getColumnIndex(colbankId))));
-		accObj.setAccountTypeId(Integer.toString(cur.getInt(cur.getColumnIndex(colAccountTypeId))));
-		accObj.setLimitUsage(Double.toString(cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))));
-		accObj.setCurrentBalance((Double.toString(cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)))));
-		return accObj;
-	}*/
-	
-	
-
-	
-	
-	
-	/*void AddRestaurant(String[][] dataSet) throws IOException {
-		SQLiteDatabase db = this.getWritableDatabase();
-		ContentValues cv = new ContentValues();
-		for (int i = 1; i < dataSet.length; i++) {
-			for (int j = 0; j < dataSet[i].length; j++) {
-				switch (j) {
-				case 0:
-					cv.put(colRDescription, dataSet[i][j]);
-					break;
-				case 1:
-					cv.put(colRType, dataSet[i][j]);
-					break;
-				case 3:
-					cv.put(colRName, dataSet[i][j]);
-					break;
-				case 4:
-					cv.put(colRAddress, dataSet[i][j]);
-					break;
-				case 5:
-					cv.put(colRTel, dataSet[i][j]);
-					break;
-				case 6:
-					cv.put(colRWebsite, dataSet[i][j]);
-					break;
-				case 7:
-					cv.put(colRRatio, dataSet[i][j]);
-					break;
-				case 8:
-					cv.put(colRDateregist, dataSet[i][j]);
-					break;
-				case 9:
-					cv.put(colRLat, dataSet[i][j]);
-					break;
-				case 10:
-					cv.put(colRLong, dataSet[i][j]);
-					break;
-				case 11:
-					cv.put(colRPic, dataSet[i][j]);
-					break;
-				default:
-					break;
-				}
-			}
-			db.insert(restaurantTable, colRName, cv);
-		}
-		db.close();
-
-	}
-
-	void AddFood(String[][] dataSet) throws IOException {
-		SQLiteDatabase db = this.getWritableDatabase();
-		ContentValues cv = new ContentValues();
-		for (int i = 1; i < dataSet.length; i++) {
-			for (int j = 0; j < dataSet[i].length; j++) {
-				switch (j) {
-				case 0:
-					cv.put(colFName, dataSet[i][j]);
-					break;
-				case 1:
-					cv.put(colFDescription, dataSet[i][j]);
-					break;
-				case 2:
-					cv.put(colFRatio, dataSet[i][j]);
-					break;
-				case 3:
-					cv.put(colFPic, dataSet[i][j]);
-					break;
-				case 4:
-					cv.put(colFRName, dataSet[i][j]);
-					break;
-				default:
-					break;
-				}
-			}
-			db.insert(foodTable, colFName, cv);
-		}
-		db.close();
-
-	}
-
-	int getRestaurantCount() {
-		SQLiteDatabase db = this.getWritableDatabase();
-		Cursor cur = db.rawQuery("Select * from " + restaurantTable, null);
-		int x = cur.getCount();
-		cur.close();
-		return x;
-	}
-
-	Cursor getImages(String name) {
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cur;
-		String WHERE = "FRNAME='" + name + "'";
-		String[] columns = new String[] { colFName, colFRatio, colFPic };
-		cur = db.query(foodTable, columns, WHERE, null, null, null, null);
-		return cur;
-	}
-
-	Cursor getAllNearBy(String type, double lat_here, double long_here,
-			double distanceLat, double distanceLong) {
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cur;
-		String WHERE;
-		if (type.equals("All")) {
-			WHERE = "RLAT BETWEEN " + (lat_here - distanceLat) + " and "
-					+ (lat_here + distanceLat) + " and " + "RLONG BETWEEN "
-					+ (long_here - distanceLong) + " and "
-					+ (long_here + distanceLong);
-			String[] columns = new String[] { colRName, colRRatio,
-					colRDescription, colRTel, colRLat, colRLong };
-			cur = db.query(restaurantTable, columns, WHERE, null, null, null,
-					null);
-			// cur = db.q
-		} else {
-			WHERE = "RTYPE ='" + type + "' and RLAT BETWEEN "
-					+ (lat_here - distanceLat) + " and "
-					+ (lat_here + distanceLat) + " and " + "RLONG BETWEEN "
-					+ (long_here - distanceLong) + " and "
-					+ (long_here + distanceLong);
-			String[] columns = new String[] { colRName, colRRatio,
-					colRDescription, colRTel, colRLat, colRLong };
-			cur = db.query(restaurantTable, columns, WHERE, null, null, null,
-					null);
-		}
-		return cur;
-
-	}
-
-	Cursor getThisRestuarant(String type) {
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cur;
-		String WHERE;
-		WHERE = "RNAME ='" + type + "'";
-		String[] columns = new String[] { colRId, colRName, colRRatio,
-				colRDescription, colRTel, colRLat, colRLong };
-		cur = db.query(restaurantTable, columns, WHERE, null, null, null, null);
-		return cur;
-
-	}
-
-	Cursor getThisFood(String frname, String fname) {
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cur;
-		String WHERE;
-		WHERE = "FRNAME ='" + frname + "'";
-		String[] columns = new String[] { colFName, colFRatio, colFDescription,
-				colFPic, colFRName };
-		cur = db.query(foodTable, columns, WHERE, null, null, null, null);
-		return cur;
-
-	}
-
-	Cursor getRestuarantName() {
-
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cur;
-		String[] columns = new String[] { colRName };
-		cur = db.query(restaurantTable, columns, null, null, null, null, null);
-		return cur;
-	}
-
-	public String[] getRNAME() {
-		SQLiteDatabase db = this.getReadableDatabase();
-		// Cursor cur = dbHelp.getRestuarantName();
-		// String[] nameArray ;
-		String[] columns = new String[] { colRName };
-		Cursor cur = db.query(restaurantTable, columns, null, null, null, null,
-				null);
-		String[] nameArray = new String[cur.getCount()];
-		// cur.moveToFirst();
-		int index = 0;
-		while (cur.moveToNext()) {
-			// Get the field values
-			nameArray[index] = cur.getString(cur.getColumnIndex(colRName));
-			index++;
-		}
-		return nameArray;
-	}
-
-	public int UpdateRestRating(int RID, float ratio) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		ContentValues cv = new ContentValues();
-		cv.put(colRRatio, ratio);
-		return db.update(restaurantTable, cv, colRId + "=" + RID, null);
-	}
-
-	public int UpdateFoodRating(String frname, String fname, float ratio) {
-		SQLiteDatabase db = this.getWritableDatabase();
-		ContentValues cv = new ContentValues();
-		cv.put(colFRatio, ratio);
-		return db.update(foodTable, cv, colFRName + "='" + frname
-				+ "' and FNAME='" + fname + "'", null);
-	}*/
 
 }
