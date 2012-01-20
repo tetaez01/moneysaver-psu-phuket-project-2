@@ -52,6 +52,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class BalanceActivity extends Activity {
 	public final int CAMERA_RESULT = 0;
+	boolean canEdit ;
 	
 	BalanceObject balanceObject;
 	Bitmap bmp;
@@ -65,9 +66,12 @@ public class BalanceActivity extends Activity {
 	private TextView editTextAmount;
 	private TextView txtDate;
 	private TextView txtTime;
+	private TextView balTitle;
+	private TextView balDescription;
 	private Button addBalance;
 	private Button viewByDate;
 	private ImageView imageCam;
+	private ImageView imageCamData;
 	private Spinner payTypeSpinner;
 	private Spinner payUsingWaySpinner;
 	private Button buttunCamera;
@@ -140,6 +144,19 @@ public class BalanceActivity extends Activity {
 			b.show();
 		}
 	}
+	@Override
+    protected void onPause() {
+        Log.d("LifeCycleTest", "onPause() called");
+        super.onPause();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("LifeCycleTest", "onResume() called");
+    }
+
 	//======================================= initial layout ===========================================
 	private void onCreateInitailLayout()
 	{
@@ -164,9 +181,14 @@ public class BalanceActivity extends Activity {
 		buttonTime = (Button) dialog.findViewById(R.id.balance_dialog_add_ButtonTime);
 		submitButton = (Button) dialog.findViewById(R.id.balance_dialog_add_buttonOK);
 	}
+	private void dialogShowActivityDataLayout(Dialog dialog)
+	{
+		balTitle = (TextView) dialog.findViewById(R.id.balance_dialog_data_title);
+		balDescription = (TextView) dialog.findViewById(R.id.balance_dialog_data_desc);
+		imageCamData = (ImageView) dialog.findViewById(R.id.balance_dialog_data_location);
+		submitButton = (Button) dialog.findViewById(R.id.balance_dialog_data_okButton);
+	}
 	//======================================= Listenner ================================================
-	
-	
 	//การทำงานเมื่อกดปุ่ม +
 	private OnClickListener buttonAddBalance = new OnClickListener() {
 		public void onClick(View view) {
@@ -193,11 +215,14 @@ public class BalanceActivity extends Activity {
 				dialog.setContentView(R.layout.balance_dialog_data);
 				dialog.setTitle("ข้อมูลรายรับ-รายจ่าย");
 				dialog.setCancelable(true);
-				
+				dialogShowActivityDataLayout(dialog);
 							
-				TextView balTitle = (TextView) dialog.findViewById(R.id.balance_dialog_data_title);
-				balTitle.setText(balanceObject.getDescription());
 				
+				balTitle.setText(balanceObject.getDescription());
+				bmp = dbHelp.getActivityImageById(balanceObject.getActivityId(),BitmapFactory.decodeResource(getResources(), R.drawable.no_image));
+							
+				imageCamData.setImageBitmap(bmp);
+					
 				String balDesc = "ประเภทการใช้จ่าย : ";
 				//ประเภทการใช้จ่าย
 				if(balanceObject.getTypeUsing().equals(FixTypeUsing.fixExpense))
@@ -222,15 +247,16 @@ public class BalanceActivity extends Activity {
 				balDesc += "วัน : "+ balanceObject.getDate()+"\n\n"+
 						  "เวลา : "+balanceObject.getTime()+"\n\n"+
 						  "จำนวน : "+balanceObject.getNetPrice();
-							
-				TextView balDescription = (TextView) dialog.findViewById(R.id.balance_dialog_data_desc);
+				
+				
 				balDescription.setText(balDesc);
 				
-				Button SubmitButton = (Button) dialog.findViewById(R.id.balance_dialog_data_okButton);
-				SubmitButton.setOnClickListener(new OnClickListener() {
+				submitButton.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) { 
 						dialog.dismiss();
+						bmp = null;
+						balanceObject = null;
 					}
 				});				
 				dialog.show();
@@ -241,9 +267,85 @@ public class BalanceActivity extends Activity {
 			}
 		}
 	};
-
-	//==================================== Method ที่เอาใว้ Reuse ภายใน Class BalanceActivity =============================
-	
+	//ถ้าคลิก รูปปฏิทินในหน้าหลักของ  รายรับ-รายจ่าย ก็ให้ขึ้นข้อมูลรายรับ-รายจ่ายของวันนั้น ๆ มาแสดง ซึ่งเรียก method onCreateDialog
+	private OnClickListener dateDataPicker = new OnClickListener() {
+		public void onClick(View view) {
+			try{					
+				showDialog(DATE_DIALOG_DATA_ID);
+			} catch (Exception e) {
+				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
+				b.setMessage(e.toString());
+				b.show();
+			}		
+		}
+	};
+	//ถ้าคลิก รูปปฏิทิน ก็ให้ขึ้น ตั้งค่า วัน เดือน ปี ซึ่งเรียก method onCreateDialog
+	private OnClickListener datePicker = new OnClickListener() {
+		public void onClick(View view) {
+			showDialog(DATE_DIALOG_ID);
+		}
+	};
+	//กรณี เปลี่ยน วัน เดือน ปี ใน dialod date ค่าถ็จะถูก set ค่่าเพื่อไปแสดงต่อไป
+	private DatePickerDialog.OnDateSetListener mDateDataSetListener = new DatePickerDialog.OnDateSetListener() {
+			// onDateSet method
+			public void onDateSet(DatePicker view, int year, int monthOfYear,
+					int dayOfMonth) {
+				try {
+					mYear = year;
+					mMonth = monthOfYear;
+					mDay = dayOfMonth;
+					updateDataByDate();
+				} catch (Exception e) {
+					AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
+					b.setMessage(e.toString());
+					b.show();
+				}
+			}
+		};	
+	//กรณี เปลี่ยน วัน เดือน ปี ใน dialod date ค่าถ็จะถูก set ค่่าเพื่อไปแสดงต่อไป
+	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+		// onDateSet method
+		public void onDateSet(DatePicker view, int year, int monthOfYear,
+				int dayOfMonth) {
+			try {
+				mYear = year;
+				mMonth = monthOfYear;
+				mDay = dayOfMonth;
+				updateDate();
+			} catch (Exception e) {
+				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
+				b.setMessage(e.toString());
+				b.show();
+			}
+		}
+	};	
+	//ถ้าคลิกรูปนาฬิกา ก็ให้ขึ้น ตั้งค่า เวลา ซึ่งเรียก method onCreateDialog
+	private OnClickListener timePicker = new OnClickListener() {
+			public void onClick(View view) {
+				showDialog(TIME_DIALOG_ID);
+			}
+		};
+	//กรณี เปลี่ยน เวลา ใน dialod time ค่าถ็จะถูก set ค่า เพื่อไปแสดงต่อไป
+	private TimePickerDialog.OnTimeSetListener mTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
+			public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+				mHour = hourOfDay;
+				mMinute = minute;
+				updateTime();
+			}
+		};
+	//การทำงานในส่วนของการกดปุ่มถ่ายรูป
+	private OnClickListener takePhoto = new OnClickListener() {
+		public void onClick(View view) {
+			File imageFile = new File(getImagePath());
+			Uri imageFileUri = Uri.fromFile(imageFile);
+			Intent i = new Intent(
+					android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
+					imageFileUri);
+			startActivityForResult(i, CAMERA_RESULT);
+		}
+	};
+	//==================================== Method ที่เอาใว้ Reuse ภายใน Class BalanceActivity =============================	
 	// ดึงข้อมูล activity ภายในเดือนปัจจุบัน ขึ้นมาแสดง โดยเรียงลำดับตาม วัน/เดือน/ปี และ เวลาที่ทำกิจกรรม
 	public ArrayList<HashMap<String, Object>> getAllActivity(List activityList){
 		for (int i = 0; i < activityList.size(); i++) {
@@ -253,7 +355,7 @@ public class BalanceActivity extends Activity {
 			hm.put(ACCOUNTIDKEY, balanceObject.getAccountId());				
 			hm.put(IMGKEY, getResources().getIdentifier(dbHelp.getBankAcronymByAccountId(balanceObject.getAccountId()), "drawable",getPackageName()));
 			hm.put(TYPEUSINGKEY, balanceObject.getTypeUsing());
-			hm.put(DESCRIPTIONKEY, balanceObject.getDescription());			
+			hm.put(DESCRIPTIONKEY, balanceObject.getDescription());	
 			hm.put(DATEKEY, curDate);
 			hm.put(TIMEKEY, balanceObject.getTime());
 			hm.put(AMOUNTKEY, balanceObject.getNetPrice());			
@@ -263,17 +365,20 @@ public class BalanceActivity extends Activity {
 			else
 				totalIncome += Double.parseDouble(balanceObject.getNetPrice().substring(0));*/
 		}
+		balanceObject = null;
 		return listview_data;
-	}
-	
+	}	
 	/* แสดงหน้าต่าง เพิ่มกิจกรรม หรือ แก้ไขข้อมูลกิจกรรม โดย isEdit จะเป็นตัวตรวจสอบว่า มาจากการแก้ไข หรือ เพิ่มกิจกรรม 
 	 * ถ้า isEdit = true แปลว่า การทำงานมาจาก คลิกข้อมูลใน listView
 	 * ถ้า isEdit = false แปลว่า การทำงานมาจาก คลิกปุ่ม + เพื่อเพิ่มกิจกรรม
 	 */
 	private void showBalanceDialog(Boolean isEdit, BalanceObject balanceObject) {
 		try {
+			//แทนค่าเพื่อใช้กรณี ระบบปิด dialog อัตดนมัต ขณะ ถ่ายรูป
+			this.balanceObject = balanceObject;
+			
 			final BalanceObject bal = balanceObject;
-			final boolean canEdit = isEdit;
+			canEdit = isEdit;
 			final Dialog dialog = new Dialog(BalanceActivity.this);
 			dialog.setContentView(R.layout.balance_dialog_add);
 			
@@ -312,6 +417,15 @@ public class BalanceActivity extends Activity {
 				txtDate.setText("วันที่ : "+bal.getDate());
 				txtTime.setText("เวลา : "+bal.getTime());
 				editTextAmount.setText(bal.getNetPrice());
+				imageCam.setImageBitmap(dbHelp.getActivityImageById(bal.getActivityId(),BitmapFactory.decodeResource(getResources(), R.drawable.no_image)));
+				/*try
+				{				
+					imageCamData.setImageBitmap(dbHelp.getActivityImageById(bal.getActivityId()));
+				}
+				catch (Exception e) {
+					imageCamData.setImageResource(R.drawable.no_image);
+				}*/
+				
 			}else
 				dialog.setTitle("เพิ่มรายรับ-รายจ่าย");
 			
@@ -332,20 +446,25 @@ public class BalanceActivity extends Activity {
 						{
 							bal.setActivityId(bal.getActivityId());
 							bal.setDescription(editTextDescription.getText().toString());
-							bal.setBitmap(bmp);
+							
+							if(bmp != null) 							bal.setBitmap(bmp);											
+							
 							bal.setTypeUsing(Integer.toString(payTypeSpinner.getSelectedItemPosition()));						
 							bal.setAccountId(getAccountIdWithIndex(payUsingWaySpinner.getSelectedItemPosition()));						
 							bal.setDate(txtDate.getText().toString().substring(txtDate.getText().toString().indexOf(": ")+2));
 							bal.setTime(txtTime.getText().toString().substring(txtTime.getText().toString().indexOf(": ")+2));
-							bal.setNetPrice(editTextAmount.getText().toString());						
+							bal.setNetPrice(editTextAmount.getText().toString());	
 
-							if(canEdit){				
-								updateTabData = dbHelp.editActivity(bal);	
-							}else{
+							if(canEdit)
+							{				
+								updateTabData = dbHelp.editActivity(bal);
+								canEdit = false;
+							}else
+							{
 								//Toast.makeText(getApplicationContext(),dbHelp.getCurrentBalanceWithAccountId(bal.getAccountId()) +","+ bal.getNetPrice(), Toast.LENGTH_LONG).show();
-								updateTabData = dbHelp.addActivity(bal);			
-							}
-							
+								updateTabData = dbHelp.addActivity(bal);																
+							}			
+							bmp = null;	
 							if(updateTabData){
 								//ทำการดึงข้อมูลมาใหม่เพื่อให้ ข้อมูลถูกเรียงตามวัน-เวลาที่ทำกิจกรรม
 								listview_data.clear();							
@@ -390,7 +509,6 @@ public class BalanceActivity extends Activity {
 
 		}
 	}	
-	
 	//=================================การทำงานในการเรียกหน้าต่าง วัน เดือน ปี หรือ เวลา ขึ้นมาแสดง ================================
 	// Creating dialog
 	@Override
@@ -406,58 +524,6 @@ public class BalanceActivity extends Activity {
 		return null;
 	}
 	//===================================การทำงานในส่วนของตั้งค่า วัน เดือน ปี =============================================
-	//ถ้าคลิก รูปปฏิทินในหน้าหลักของ  รายรับ-รายจ่าย ก็ให้ขึ้นข้อมูลรายรับ-รายจ่ายของวันนั้น ๆ มาแสดง ซึ่งเรียก method onCreateDialog
-	private OnClickListener dateDataPicker = new OnClickListener() {
-		public void onClick(View view) {
-			try{					
-				showDialog(DATE_DIALOG_DATA_ID);
-			} catch (Exception e) {
-				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
-				b.setMessage(e.toString());
-				b.show();
-			}		
-		}
-	};
-	//ถ้าคลิก รูปปฏิทิน ก็ให้ขึ้น ตั้งค่า วัน เดือน ปี ซึ่งเรียก method onCreateDialog
-	private OnClickListener datePicker = new OnClickListener() {
-		public void onClick(View view) {
-			showDialog(DATE_DIALOG_ID);
-		}
-	};
-	//กรณี เปลี่ยน วัน เดือน ปี ใน dialod date ค่าถ็จะถูก set ค่่าเพื่อไปแสดงต่อไป
-		private DatePickerDialog.OnDateSetListener mDateDataSetListener = new DatePickerDialog.OnDateSetListener() {
-			// onDateSet method
-			public void onDateSet(DatePicker view, int year, int monthOfYear,
-					int dayOfMonth) {
-				try {
-					mYear = year;
-					mMonth = monthOfYear;
-					mDay = dayOfMonth;
-					updateDataByDate();
-				} catch (Exception e) {
-					AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
-					b.setMessage(e.toString());
-					b.show();
-				}
-			}
-		};	
-	//กรณี เปลี่ยน วัน เดือน ปี ใน dialod date ค่าถ็จะถูก set ค่่าเพื่อไปแสดงต่อไป
-	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
-		// onDateSet method
-		public void onDateSet(DatePicker view, int year, int monthOfYear,
-				int dayOfMonth) {
-			try {
-				mYear = year;
-				mMonth = monthOfYear;
-				mDay = dayOfMonth;
-				updateDate();
-			} catch (Exception e) {
-				AlertDialog.Builder b = new AlertDialog.Builder(BalanceActivity.this);
-				b.setMessage(e.toString());
-				b.show();
-			}
-		}
-	};	
 	//อัพเดทรายรับ-รายจ่าย ให้เป็นตามรายการ วัน ที่ระบุ
 	public void updateDataByDate() {
 		listview_data.clear();							
@@ -471,23 +537,7 @@ public class BalanceActivity extends Activity {
 	public void updateDate() {
 		this.txtDate.setText(new StringBuilder().append("วันที่ : ").append(mDay).append("/").append(mMonth + 1).append("/").append(mYear));
 	}
-
 	//===================================การทำงานในส่วนของตั้งค่า เวลา =============================================
-	
-	//ถ้าคลิกรูปนาฬิกา ก็ให้ขึ้น ตั้งค่า เวลา ซึ่งเรียก method onCreateDialog
-	private OnClickListener timePicker = new OnClickListener() {
-		public void onClick(View view) {
-			showDialog(TIME_DIALOG_ID);
-		}
-	};
-	//กรณี เปลี่ยน เวลา ใน dialod time ค่าถ็จะถูก set ค่า เพื่อไปแสดงต่อไป
-	private TimePickerDialog.OnTimeSetListener mTimeSetListener = new TimePickerDialog.OnTimeSetListener() {
-		public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-			mHour = hourOfDay;
-			mMinute = minute;
-			updateTime();
-		}
-	};
 	// อัพเดทเวลาให้อยู่ในรูปแบบในการ แสดงออกทางหน้าจอ ให้เป็นปัจจุบัน
 	public void updateTime() {
 		String hour = Integer.toString(mHour);
@@ -499,29 +549,26 @@ public class BalanceActivity extends Activity {
 		this.txtTime.setText(new StringBuilder().append("เวลา : ").append(hour).append(".").append(minute));
 	}
 	//======================================ส่วนในการทำงานของ การถ่ายรูปในหน้า กิจกรรม===================================== 
-	private OnClickListener takePhoto = new OnClickListener() {
-		public void onClick(View view) {
-			File imageFile = new File(getImagePath());
-			Uri imageFileUri = Uri.fromFile(imageFile);
-			Intent i = new Intent(
-					android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT,
-					imageFileUri);
-			startActivityForResult(i, CAMERA_RESULT);
-		}
-	};
-
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 		switch (requestCode) {
 		case CAMERA_RESULT:
 			if (resultCode == RESULT_OK) {
-				Log.v("RESULTS", "HERE");
-				bmp = BitmapFactory.decodeFile(getImagePath());
-				bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
-				imageCam.setImageBitmap(bmp);
-				Log.v("RESULTS", "Image Width: " + bmp.getWidth());
-				Log.v("RESULTS", "Image Height: " + bmp.getHeight());
+				try{
+					Log.v("RESULTS", "HERE");
+					bmp = BitmapFactory.decodeFile(getImagePath());
+					bmp = Bitmap.createScaledBitmap(bmp, bmp.getWidth()/2, bmp.getHeight()/2, true);
+					imageCam.setImageBitmap(bmp);
+					Log.v("RESULTS", "Image Width: " + bmp.getWidth());
+					Log.v("RESULTS", "Image Height: " + bmp.getHeight());
+				}catch (Exception e) {
+					Toast.makeText(getApplicationContext(),"เกิดข้อผิดพลาดในการใส่ข้อมูล กรุณาลองใหม่อีกครั้ง", Toast.LENGTH_LONG).show();
+					/*if(canEdit)
+						showBalanceDialog(canEdit,balanceObject);
+					else
+						showBalanceDialog(canEdit,new BalanceObject());
+					imageCam.setImageBitmap(bmp);*/
+				}
 			}
 			break;
 		}
@@ -531,7 +578,6 @@ public class BalanceActivity extends Activity {
 		return  Environment.getExternalStorageDirectory().getAbsolutePath() + "/tmp_image.jpg";
 	}
 	//================================== การดึงข้อมูลมาจาก Database ================================================
-	
 	// method ที่เอาใว้ใช้ในการดึง บัญชีที่เรามีทั้งหมดมาแสดง ในหน้า เพิ่ม กิจกรรม หรือ แก้ไขกิจกรรม
 	public String[] getBankInAccount(){
 		List bankAcronymList = dbHelp.getBankAcronymInAccount();
@@ -554,13 +600,6 @@ public class BalanceActivity extends Activity {
 		}
 		return accountId[index];
 	}
-	
-	//================================== ใช้ในการ update ค่า tab account ให้เปลี่ยนราคา ================================================
-	/*private void switchTabSpecial(long l){
-        MoneySaverMain moneyActivity = (MoneySaverMain) this.getParent();
-        moneyActivity.updateDataChange(l);
-	}*/
-
 	// ================================= Class ที่นำข้อมูลที่ใส่ใน hm มาใส่ Listview เพื่อให้แสดงบนหน้าจอหลักใน Tab Activity=================================================
 	
 	private class ListViewLayout extends BaseAdapter {

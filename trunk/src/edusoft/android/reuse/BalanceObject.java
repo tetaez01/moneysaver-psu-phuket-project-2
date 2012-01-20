@@ -7,11 +7,11 @@ public class BalanceObject {
 	private String accountId = "";
 	private String typeUsing = "";
 	private String description = "";
-	private Bitmap bm;
+	private Bitmap bm =null;
 	private String date = "";
 	private String time = "";
 	private String netPrice = "";
-	
+
 	public void setActivityId(String activityId){
 		this.activityId = activityId;
 	}
