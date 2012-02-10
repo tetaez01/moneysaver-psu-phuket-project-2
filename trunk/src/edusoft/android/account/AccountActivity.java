@@ -142,9 +142,9 @@ public class AccountActivity extends Activity {
 				dialog.setTitle("ข้อมูลบัญชี");
 				dialog.setCancelable(true);
 				
-				String accDesc = "เลขที่บัญชี :"+ accObj.getAccountNumber()+"\n\n"+
-				                 "ชื่อบัญชี :" + accObj.getAccountName() + "\n\n"+
-				                 "ประเภทบัญชี :";
+				String accDesc = "เลขที่บัญชี : "+ accObj.getAccountNumber()+"\n\n"+
+				                 "ชื่อบัญชี : " + accObj.getAccountName() + "\n\n"+
+				                 "ประเภทบัญชี : ";
 				if(accObj.getAccountTypeId().equals(FixAccountType.FIX_CASH_ACCOUNT_ID))
 					accDesc +=(FixAccountType.FIX_CASH_ACCOUNT_DESCRIPTION+"\n\n");
 				else if(accObj.getAccountTypeId().equals(FixAccountType.FIX_CURRENT_ACCOUNT_ID))
@@ -154,8 +154,8 @@ public class AccountActivity extends Activity {
 				else if(accObj.getAccountTypeId().equals(FixAccountType.FIX_DEPOSIT_ACCOUNT_ID))
 					accDesc +=(FixAccountType.FIX_DEPOSIT_ACCOUNT_DESCRIPTION+"\n\n");
 				
-				accDesc = accDesc +"ยอดเงินคงเหลือ :"+ accObj.getCurrentBalance()+"\n\n"+
-						  "จำกัดวงเงินที่ใช้ :"+accObj.getLimitUsage();
+				accDesc = accDesc +"ยอดเงินคงเหลือ : "+ accObj.getCurrentBalance()+" บาท.\n\n"+
+						  "จำกัดวงเงินที่ใช้ : "+accObj.getLimitUsage()+" บาท.";
 							
 				TextView accountDescription = (TextView) dialog.findViewById(R.id.account_dialog_data_view);
 				accountDescription.setText(accDesc);
