@@ -270,8 +270,8 @@ public class BalanceActivity extends Activity {
 					balDesc +=(FixAccountType.FIX_DEPOSIT_ACCOUNT_DESCRIPTION+"\n\n");
 		
 				balDesc += "วัน : "+ balanceObject.getDate()+"\n\n"+
-						  "เวลา : "+balanceObject.getTime()+"\n\n"+
-						  "จำนวน : "+balanceObject.getNetPrice();
+						  "เวลา : "+balanceObject.getTime()+" น.\n\n"+
+						  "จำนวน : "+balanceObject.getNetPrice() + " บาท";
 				
 				
 				balDescription.setText(balDesc);
