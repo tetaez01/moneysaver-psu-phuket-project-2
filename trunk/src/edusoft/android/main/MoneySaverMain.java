@@ -47,10 +47,10 @@ public class MoneySaverMain extends TabActivity {
 					res.getDrawable(R.layout.ic_tab_report)).setContent(intent);
 			tabHost.addTab(spec);
 			
-			intent = new Intent().setClass(this, ReportActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			spec = tabHost.newTabSpec("เสริม").setIndicator("เสริม",
-					res.getDrawable(R.layout.ic_tab_other)).setContent(intent);
-			tabHost.addTab(spec);
+//			intent = new Intent().setClass(this, ReportActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//			spec = tabHost.newTabSpec("เสริม").setIndicator("เสริม",
+//					res.getDrawable(R.layout.ic_tab_other)).setContent(intent);
+//			tabHost.addTab(spec);
 
 			tabHost.setCurrentTab(0);
 		} catch (Exception e) {

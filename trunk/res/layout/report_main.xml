@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="30dip"
+        android:background="#716D69"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/balance_main_top"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="0.8"
+            android:background="#716D69"
+            android:gravity="center_horizontal"
+            android:text="รายงาน"
+            android:textSize="15dip"
+            android:typeface="serif" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout1"
+        android:text="สรุปรายงาน รายรับ/รายจ่าย" 
+        android:layout_centerHorizontal="true"/>
+
+    <RadioGroup
+        android:id="@+id/report_main_radgroup"
+        android:layout_below="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal" >
+
+        <RadioButton
+            android:id="@+id/report_main_radMonth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="รายเดือน" />
+
+        <RadioButton
+            android:id="@+id/report_main_radYear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/report_main_radMonth"
+            android:layout_alignBottom="@+id/report_main_radMonth"
+            android:layout_marginLeft="40dp"
+            android:layout_toRightOf="@+id/report_main_radMonth"
+            android:text="รายปี" />
+    </RadioGroup>
+
+    <Spinner
+        android:id="@+id/report_main_spinnerCategory"
+        android:layout_width="230dip"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/report_main_radgroup"
+        android:layout_marginLeft="20dp" />
+
+    <ImageView
+        android:id="@+id/report_main_imgGraph"
+        android:layout_width="100dip"
+        android:layout_height="100dip"
+        android:layout_below="@+id/report_main_spinnerCategory"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/no_image" />
+
+    <TableLayout
+        android:id="@+id/tableLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/report_main_radgroup"
+        android:layout_below="@+id/report_main_imgGraph"
+        android:layout_marginTop="5dp" >
+
+        <TableRow
+            android:id="@+id/tableRow1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/circle_green" />
+
+            <TextView
+                android:id="@+id/report_main_txtIncome"
+                android:paddingBottom="5dip"
+                android:paddingLeft="10dip"
+                android:paddingTop="3dip"
+                android:text="ไม่มีรายรับในช่วงเวลาที่ระบุ" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/circle_red" />
+
+            <TextView
+                android:id="@+id/report_main_txtExpense"
+                android:paddingBottom="5dip"
+                android:paddingLeft="10dip"
+                android:paddingTop="3dip"
+                android:text="ไม่มีรายจ่ายในช่วงเวลาที่ระบุ" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/circle_yellow" />
+
+            <TextView
+                android:id="@+id/report_main_txtOver"
+                android:paddingLeft="10dip"
+                android:paddingTop="3dip"
+                android:text="ไม่มียอดเงินเกินในช่วงเวลาที่ระบุ" />
+        </TableRow>
+    </TableLayout>
+
+</RelativeLayout>
