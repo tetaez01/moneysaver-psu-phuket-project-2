@@ -841,6 +841,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}					
 		return bmp;
 	}
+	//แสดงรายละเอียดรายรับ-รายจ่ายที่ได้จากการกดที่แถวของรายการนั้น ๆ
 	public BalanceObject getActivityDatailWithId(String activityId)
 	{
 		BalanceObject balObj = new BalanceObject();
@@ -860,7 +861,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		}
 		return balObj;
 	}
-
+	//ดึงรายรับของเดือนที่ระบุมาแสดงในหน้ารายงาน
+	public String getIncomeWithMonth(String month){
+		String incomeAmount = ""; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS income FROM "+activityTable+" WHERE ("+colAccountTypeUsingId+" = '0' OR "+colAccountTypeUsingId+" = '2') AND "+colActivityDate+" like '%/"+month+"/%'", null);
+		//Cursor cur = db.rawQuery("SELECT SUM(net_price) AS income FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" = 0 AND "+colActivityDate+" like '%/"+month+"/%' ", null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			incomeAmount = Double.toString(cur.getDouble(cur.getColumnIndex("income")));				
+		}
+		cur.close();
+		return incomeAmount;	
+	}
+	//ดึงรายจ่ายของเดือนที่ระบุมาแสดงในหน้ารายงาน
+	public String getExpenseWithMonth(String month){
+		String expenseAmount = ""; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colActivityDate+" like '%/"+month+"/%' ", null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			expenseAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
+		}
+		cur.close();
+		return expenseAmount;	
+	}
+	//ดึงรายรับของปีที่ระบุมาแสดงในหน้ารายงาน
+	public String getIncomeWithYear(String year){
+		String incomeAmount = ""; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS income FROM "+activityTable+" WHERE ("+colAccountTypeUsingId+" = '0' OR "+colAccountTypeUsingId+" = '2') AND "+colActivityDate+" like '%"+year+"' ", null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			incomeAmount = Double.toString(cur.getDouble(cur.getColumnIndex("income")));				
+		}
+		cur.close();
+		return incomeAmount;	
+	}
+	//ดึงรายจ่ายของเดือนที่ระบุมาแสดงในหน้ารายงาน
+	public String getExpenseWithYear(String year){
+		String expenseAmount = ""; 
+		SQLiteDatabase db = this.getWritableDatabase();
+		Cursor cur = db.rawQuery("SELECT SUM(net_price) AS expense FROM "+activityTable+" WHERE "+colAccountTypeUsingId+" <> '0' AND "+colActivityDate+" like '%"+year+"' ", null);
+		if(cur.getCount() == 1){
+			cur.moveToFirst();
+			expenseAmount = Double.toString(cur.getDouble(cur.getColumnIndex("expense")));				
+		}
+		cur.close();
+		return expenseAmount;	
+	}
 	//=============================== REUSE ===============================================
 
 }
