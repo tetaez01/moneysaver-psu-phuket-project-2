@@ -211,12 +211,15 @@ public class AccountActivity extends Activity {
 			
 			//วงเงินจำกัดของบัญชีนั้น ๆ 
 			String limitUsage = new Utility().addDecimal(accObj.getLimitUsage());
-			int percent = calculatePercentage(limitUsage, expense);
+			int percent = 0;//calculatePercentage(limitUsage, expense);
 
-			if (( percent == 100) && expense.equals(limitUsage) && expense.equals("0.00"))
-				hm.put(PERCENTAGEKEY, percent);
-			else
-				hm.put(PERCENTAGEKEY, 100 - percent);				
+			if ((Double.parseDouble(limitUsage) == 0 && Double.parseDouble(expense) == 0) || (Double.parseDouble(limitUsage) == 100 && Double.parseDouble(expense) == 0) )
+				percent = 100;
+				//hm.put(PERCENTAGEKEY, 100);
+			else //if(Integer.parseInt(limitUsage) == 0 && Integer.parseInt(expense) == 0)
+				percent = 100 - calculatePercentage(limitUsage, expense);
+			
+			hm.put(PERCENTAGEKEY, percent);				
 			listview_data.add(hm);
 			/*totalIncome += Integer.parseInt("10000");
 			totalExpense = Integer.parseInt("5000")*/;
@@ -344,10 +347,10 @@ public class AccountActivity extends Activity {
 	 *  ปล. ถ้าเกิด % เป็น 0 ก็ยังใช้ได้ แต่ จะหมายถึงว่า เราใช้เกินวงเงินที่เราจำกัดใว้แล้ว แต่ยังไม่เกินวงเงินที่มีทั้งหมดในแต่ละบัญชี
 	 */
 	public int calculatePercentage(String limit, String expense) {
-		int percent = 100;
-		if (!expense.equals("0.00"))
-			percent = (int) (Double.parseDouble(expense) * 100 / Double.parseDouble(limit));
-		return percent;
+/*		int percent = 100;
+		if (!expense.equals("0.00"))*/
+			//percent = (int) (Double.parseDouble(expense) * 100 / Double.parseDouble(limit));
+		return (int) (Double.parseDouble(expense) * 100 / Double.parseDouble(limit));
 	}
 
 	//=================================Class ที่นำข้อมูลที่ใส่ใน hm มาใส่ Listview เพื่อให้แสดงบนหน้าจอหลักใน Tab Activity=================================================

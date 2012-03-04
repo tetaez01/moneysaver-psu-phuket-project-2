@@ -202,6 +202,8 @@ public class BalanceActivity extends Activity {
 				adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeForCash);
 				adapterPayType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				payTypeSpinner.setAdapter(adapterPayType);
+				if(payTypePosition > 1)
+					payTypePosition = 0;
 				payTypeSpinner.setSelection(payTypePosition);
 			}
 			else
@@ -440,7 +442,7 @@ public class BalanceActivity extends Activity {
 			if (canEdit) {
 				dialog.setTitle("แก้ไขรายรับ-รายจ่าย");
 				editTextDescription.setText(bal.getDescription());				
-				payTypeSpinner.setSelection(Integer.parseInt(bal.getTypeUsing()));
+				//payTypeSpinner.setSelection(Integer.parseInt(bal.getTypeUsing()));
 				payTypePosition = Integer.parseInt(bal.getTypeUsing());
 				payUsingWaySpinner.setSelection(adapterPayUsing.getPosition(dbHelp.getBanknameForSpinner(balanceObject.getAccountId())));
 				txtDate.setText("วันที่ : "+bal.getDate());
