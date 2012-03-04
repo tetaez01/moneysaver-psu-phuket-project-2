@@ -489,7 +489,7 @@ public class BalanceActivity extends Activity {
 							if(canEdit)
 							{				
 								updateTabData = dbHelp.editActivity(bal);
-								canEdit = false;
+								//Toast.makeText(getApplicationContext(),dbHelp.editActivity(bal), Toast.LENGTH_LONG).show();
 							}else
 							{
 								//Toast.makeText(getApplicationContext(),dbHelp.getCurrentBalanceWithAccountId(bal.getAccountId()) +","+ bal.getNetPrice(), Toast.LENGTH_LONG).show();
@@ -501,6 +501,7 @@ public class BalanceActivity extends Activity {
 								listview_data.clear();							
 								listview_data = getAllActivity(dbHelp.getActivityListData(curDate));							
 								listLayout.notifyDataSetChanged();
+								canEdit = false;
 								dialog.dismiss();
 							}else{
 								Toast.makeText(getApplicationContext(),"จำนวนเงินมากกว่าเงินคงเหลือ กรุณาใส่อีกครั้ง", Toast.LENGTH_LONG).show();

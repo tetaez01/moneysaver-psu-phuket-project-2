@@ -215,8 +215,7 @@ public class AccountActivity extends Activity {
 
 			if ((Double.parseDouble(limitUsage) == 0 && Double.parseDouble(expense) == 0) || (Double.parseDouble(limitUsage) == 100 && Double.parseDouble(expense) == 0) )
 				percent = 100;
-				//hm.put(PERCENTAGEKEY, 100);
-			else //if(Integer.parseInt(limitUsage) == 0 && Integer.parseInt(expense) == 0)
+			else
 				percent = 100 - calculatePercentage(limitUsage, expense);
 			
 			hm.put(PERCENTAGEKEY, percent);				
@@ -297,12 +296,23 @@ public class AccountActivity extends Activity {
 							hm.put(CATEGORYIDKEY, accObj.getAccountTypeId());//dbHelp.getAccTypeByAccountTypeId(accObj.getAccountTypeId()).getAccountType());
 							hm.put(CURRENTBALANCEKEY,accObj.getCurrentBalance());
 							hm.put(CURRENTDATEKEY, new Utility().getCurrentDate());
-							hm.put(LIMITKEY, new Utility().addDecimal(accObj.getLimitUsage()));
-							hm.put(EXPENSEKEY, new Utility().addDecimal("0.00"));
-							if (calculatePercentage("0.00", "0.00") == 100)
-								hm.put(PERCENTAGEKEY, calculatePercentage("0.00","0.00"));
+							
+							
+							String limitUsage = new Utility().addDecimal(accObj.getLimitUsage());
+							String expense = new Utility().addDecimal("0.00");
+							
+							hm.put(LIMITKEY, limitUsage);
+							hm.put(EXPENSEKEY, expense);
+							
+							int percent = 0;
+							
+							if ((Double.parseDouble(limitUsage) == 0 && Double.parseDouble(expense) == 0) || (Double.parseDouble(limitUsage) == 100 && Double.parseDouble(expense) == 0) )
+								percent = 100;
 							else
-								hm.put(PERCENTAGEKEY, 100.00 - calculatePercentage("0.00", "0.00"));
+								percent = 100 - calculatePercentage(limitUsage, expense);
+							hm.put(PERCENTAGEKEY, percent);	
+							
+							
 							
 							if(canEdit){							
 								dbHelp.editLimitedUsageForAccount(accObj);
@@ -311,6 +321,7 @@ public class AccountActivity extends Activity {
 								Toast.makeText(getApplicationContext(),"แก้ไขข้อมูลเรียบร้อย", Toast.LENGTH_LONG).show();
 							}else{
 								hm.put(ACCOUNTIDKEY, dbHelp.addAccount(accObj));
+								hm.put(INCOMEKEY, "0.00");
 								listview_data.add(hm);
 								Toast.makeText(getApplicationContext(),"เพิ่มข้อมูลเรียบร้อย", Toast.LENGTH_LONG).show();
 							}			
@@ -460,8 +471,19 @@ public class AccountActivity extends Activity {
 									@Override
 									public void onClick(View v) {
 										try {											
-											dbHelp.editLimitedUsageForCash(Integer.parseInt((String) hm.get(ACCOUNTIDKEY)),Double.parseDouble(limitEdit.getText().toString()));					
-											hm.put(LIMITKEY, new Utility().addDecimal(limitEdit.getText().toString()));
+											dbHelp.editLimitedUsageForCash(Integer.parseInt((String) hm.get(ACCOUNTIDKEY)),Double.parseDouble(limitEdit.getText().toString()));
+											
+											String limitUsage = new Utility().addDecimal(limitEdit.getText().toString());
+											String expense = (String) hm.get(EXPENSEKEY);
+											int percent = 0;
+											
+											if ((Double.parseDouble(limitUsage) == 0 && Double.parseDouble(expense) == 0) || (Double.parseDouble(limitUsage) == 100 && Double.parseDouble(expense) == 0) )
+												percent = 100;
+											else
+												percent = 100 - calculatePercentage(limitUsage, expense);
+											
+											hm.put(LIMITKEY, limitUsage);
+											hm.put(PERCENTAGEKEY, percent);	
 											listview_data.set(index, hm);
 											listLayout.notifyDataSetChanged();
 											dialog.dismiss();

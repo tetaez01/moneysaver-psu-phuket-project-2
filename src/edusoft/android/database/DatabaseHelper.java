@@ -398,10 +398,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
 			if(cur.getCount() == 1){
 				cur.moveToFirst();
-				limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amount)*-1);
+				//limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amount)*-1);
 				curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amount)*-1);
 				cv = new ContentValues();
-				cv.put(colAccountLimitUsage, limit_usage);
+				//cv.put(colAccountLimitUsage, limit_usage);
 				cv.put(colAccountCurrentBalance, curBalance);
 			}
 			rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);
@@ -440,10 +440,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
 				if(cur.getCount() == 1){
 					cur.moveToFirst();
-					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
+					//limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
 					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit));	
 					cv = new ContentValues();
-					cv.put(colAccountLimitUsage, limit_usage);
+					//cv.put(colAccountLimitUsage, limit_usage);
 					cv.put(colAccountCurrentBalance, curBalance);
 				}
 				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
@@ -451,7 +451,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
 				if(cur.getCount() == 1){
 					cur.moveToFirst();
-					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit)*-1);
+					//limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit)*-1);
 					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit)*-1);
 					if(limit_usage < 0 && curBalance < 0 ) 
 					{
@@ -459,7 +459,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 						curBalance = 0;
 					}
 					cv = new ContentValues();
-					cv.put(colAccountLimitUsage, limit_usage);
+					//cv.put(colAccountLimitUsage, limit_usage);
 					cv.put(colAccountCurrentBalance, curBalance);
 				}
 				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);
@@ -467,14 +467,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
 				if(cur.getCount() == 1){
 					cur.moveToFirst();
-					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amount)*-1);
+					//limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amount)*-1);
 					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amount)*-1);	
 					cv = new ContentValues();
-					cv.put(colAccountLimitUsage, limit_usage);
+					//cv.put(colAccountLimitUsage, limit_usage);
 					cv.put(colAccountCurrentBalance, curBalance);
 				}
 				rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);			
-			}else
+			}
 			
 			if(rowEffected > 0)
 				returnValue = true;
@@ -514,10 +514,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				if(cur.getCount() == 1)
 				{
 					cur.moveToFirst();
-					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
+					//limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))+ (Double.parseDouble(amountFromEdit));
 					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) + (Double.parseDouble(amountFromEdit));	
 					cv = new ContentValues();
-					cv.put(colAccountLimitUsage, limit_usage);
+					//cv.put(colAccountLimitUsage, limit_usage);
 					cv.put(colAccountCurrentBalance, curBalance);
 				}
 				
@@ -529,10 +529,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				if(cur.getCount() == 1)
 				{
 					cur.moveToFirst();
-					limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))- (Double.parseDouble(amountBeforEdit));
+					//limit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage))- (Double.parseDouble(amountBeforEdit));
 					curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) - (Double.parseDouble(amountBeforEdit));	
 					cv = new ContentValues();
-					cv.put(colAccountLimitUsage, limit_usage);
+					//cv.put(colAccountLimitUsage, limit_usage);
 					cv.put(colAccountCurrentBalance, curBalance);
 				}
 				
@@ -561,7 +561,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		if(cur.getCount() == 1){
 			cur.moveToFirst();
 			curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance));
-			limitUsage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage));
+			//limitUsage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage));
 		}
 		
 		if(oldBalObj.getTypeUsing().equals(FixTypeUsing.fixIncome))
@@ -571,11 +571,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		else
 		{
 			curBalance += Double.parseDouble(oldBalObj.getNetPrice());
-			limitUsage += Double.parseDouble(oldBalObj.getNetPrice());
+			//อัพเดท limit ของเงินสดกรณีเปลี่ยนจาก ถอนเงิน เป็น รายรับ หรือราย่จาย
+			/*if(newBalObj.getAccountId().equals("0") && oldBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw))
+			{
+				cur = db.rawQuery("SELECT account_limit_usage FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
+				if(cur.getCount() == 1){
+					cur.moveToFirst();
+					//curBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance));
+					limitUsage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage));
+					cv = new ContentValues();
+					cv.put(colAccountLimitUsage, limitUsage-Double.parseDouble(oldBalObj.getNetPrice()));
+					db.update(accountTable, cv, colAccountId + "=0", null);
+				}
+			}*/
+			//limitUsage += Double.parseDouble(oldBalObj.getNetPrice());
 		}
 		if(curBalance >= 0){
 			cv = new ContentValues();
-			cv.put(colAccountLimitUsage, limitUsage);
+			//cv.put(colAccountLimitUsage, limitUsage);
 			cv.put(colAccountCurrentBalance, curBalance);
 			//ถอน เป็น ถอน แต่เปลี่ยนบัญชี
 			if(oldBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw) && newBalObj.getTypeUsing().equals(FixTypeUsing.fixWithdraw))
@@ -612,10 +625,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				{				
 					cur = db.rawQuery("SELECT account_limit_usage,account_current_balance FROM " + accountTable +" WHERE "+colAccountId+"=0", null);
 					cur.moveToFirst();
-					double cashlimit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage)) -  (Double.parseDouble(amount));
+					//double cashlimit_usage = cur.getDouble(cur.getColumnIndex(colAccountLimitUsage)) -  (Double.parseDouble(amount));
 					double casgcurBalance = cur.getDouble(cur.getColumnIndex(colAccountCurrentBalance)) - (Double.parseDouble(amount));	
 					cv = new ContentValues();
-					cv.put(colAccountLimitUsage, cashlimit_usage);
+					//cv.put(colAccountLimitUsage, cashlimit_usage);
 					cv.put(colAccountCurrentBalance, casgcurBalance);
 					rowEffected = db.update(accountTable, cv, colAccountId + "=0", null);
 					//บวก จำนวนคงเหลือ กับ วงเงินในบัญชีนั้น ๆ
