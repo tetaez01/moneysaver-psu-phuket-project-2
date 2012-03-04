@@ -53,6 +53,7 @@ import android.widget.AdapterView.OnItemClickListener;
 public class BalanceActivity extends Activity {
 	public final int CAMERA_RESULT = 0;
 	boolean canEdit ;
+	int payTypePosition = 0;
 	
 	BalanceObject balanceObject;
 	Bitmap bmp;
@@ -201,12 +202,14 @@ public class BalanceActivity extends Activity {
 				adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeForCash);
 				adapterPayType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 				payTypeSpinner.setAdapter(adapterPayType);
+				payTypeSpinner.setSelection(payTypePosition);
 			}
 			else
 			{
 				adapterPayType = new ArrayAdapter(BalanceActivity.this,android.R.layout.simple_spinner_item, payTypeForAccount);
 				adapterPayType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				payTypeSpinner.setAdapter(adapterPayType);				
+				payTypeSpinner.setAdapter(adapterPayType);		
+				payTypeSpinner.setSelection(payTypePosition);
 			}
 				
 		}
@@ -438,6 +441,7 @@ public class BalanceActivity extends Activity {
 				dialog.setTitle("แก้ไขรายรับ-รายจ่าย");
 				editTextDescription.setText(bal.getDescription());				
 				payTypeSpinner.setSelection(Integer.parseInt(bal.getTypeUsing()));
+				payTypePosition = Integer.parseInt(bal.getTypeUsing());
 				payUsingWaySpinner.setSelection(adapterPayUsing.getPosition(dbHelp.getBanknameForSpinner(balanceObject.getAccountId())));
 				txtDate.setText("วันที่ : "+bal.getDate());
 				txtTime.setText("เวลา : "+bal.getTime());

@@ -211,10 +211,12 @@ public class AccountActivity extends Activity {
 			
 			//Ç§à§Ô¹¨Ó¡Ñ´¢Í§ºÑ­ªÕ¹Ñé¹ æ 
 			String limitUsage = new Utility().addDecimal(accObj.getLimitUsage());
-			if (calculatePercentage(limitUsage, expense) == 100)
-				hm.put(PERCENTAGEKEY, calculatePercentage(new Utility().addDecimal(accObj.getLimitUsage()), expense));
+			int percent = calculatePercentage(limitUsage, expense);
+
+			if (( percent == 100) && expense.equals(limitUsage) && expense.equals("0.00"))
+				hm.put(PERCENTAGEKEY, percent);
 			else
-				hm.put(PERCENTAGEKEY, 100 - calculatePercentage(new Utility().addDecimal(accObj.getLimitUsage()), expense));				
+				hm.put(PERCENTAGEKEY, 100 - percent);				
 			listview_data.add(hm);
 			/*totalIncome += Integer.parseInt("10000");
 			totalExpense = Integer.parseInt("5000")*/;
